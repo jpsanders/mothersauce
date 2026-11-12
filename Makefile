@@ -2,8 +2,8 @@ SRC := src
 TESTS := tests
 SCRIPTS := scripts
 ROOT_EC_FILES := $(wildcard *.yaml *.yml *.md) .github
-PACKAGE := python_template
-DOCKER_IMAGE := python-template:latest
+PACKAGE := mothersauce
+DOCKER_IMAGE := mothersauce:latest
 
 .PHONY: help
 help:

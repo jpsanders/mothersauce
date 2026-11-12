@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from python_template import __version__
-from python_template.cli import PROG, main
+from mothersauce import __version__
+from mothersauce.cli import PROG, main
 
 
 def test_no_command_shows_status(capsys: pytest.CaptureFixture[str]) -> None:
@@ -31,13 +31,13 @@ def test_times_out_of_range_is_an_error() -> None:
 def test_version(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit):
         main(["--version"])
-    assert capsys.readouterr().out.strip() == f"python-template {__version__}"
+    assert capsys.readouterr().out.strip() == f"mothersauce {__version__}"
 
 
 def test_guide_prints_the_manual(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["guide"]) == 0
     out = capsys.readouterr().out
-    assert out.startswith("# python-template")
+    assert out.startswith("# mothersauce")
     assert "## FOR AGENTS" in out
 
 
@@ -45,12 +45,12 @@ def test_man_raw_is_roff(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["man", "--raw"]) == 0
     out = capsys.readouterr().out
     assert out.startswith(f".TH {PROG.upper()} 1")
-    assert ".SH NAME\npython-template \\- " in out
+    assert ".SH NAME\nmothersauce \\- " in out
 
 
 def test_man_install(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
     assert main(["man", "--install"]) == 0
-    page = tmp_path / "man" / "man1" / "python-template.1"
+    page = tmp_path / "man" / "man1" / "mothersauce.1"
     assert page.read_text(encoding="utf-8").startswith(f".TH {PROG.upper()} 1")
-    assert "man python-template" in capsys.readouterr().out
+    assert "man mothersauce" in capsys.readouterr().out

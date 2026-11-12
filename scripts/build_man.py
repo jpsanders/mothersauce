@@ -1,8 +1,8 @@
 """
 Build the man page and the packaged manual from docs/MANUAL.md.
 
-docs/MANUAL.md is the one source. It is copied into the package, so ``python-template guide`` prints it, and converted
-to roff, so ``python-template man`` and ``man python-template`` show it.
+docs/MANUAL.md is the one source. It is copied into the package, so ``mothersauce guide`` prints it, and converted
+to roff, so ``mothersauce man`` and ``man mothersauce`` show it.
 
     python scripts/build_man.py           # write the packaged manual and the man page
     python scripts/build_man.py --check   # fail when either is out of date
@@ -13,8 +13,8 @@ import re
 import sys
 from pathlib import Path
 
-PROG = "python-template"
-PACKAGE = "python_template"
+PROG = "mothersauce"
+PACKAGE = "mothersauce"
 ROOT = Path(__file__).resolve().parent.parent
 MANUAL = ROOT / "docs" / "MANUAL.md"
 PACKAGED = ROOT / "src" / PACKAGE / "data" / "MANUAL.md"

@@ -65,10 +65,10 @@ jobs:
           python -m venv /tmp/clean
           /tmp/clean/bin/pip install dist/*.whl
           cd /tmp
-          /tmp/clean/bin/python-template --version
-          /tmp/clean/bin/python-template feed --times 2 --json
-          /tmp/clean/bin/python-template guide | head -3
-          /tmp/clean/bin/python-template man --raw | head -1
+          /tmp/clean/bin/mothersauce --version
+          /tmp/clean/bin/mothersauce feed --times 2 --json
+          /tmp/clean/bin/mothersauce guide | head -3
+          /tmp/clean/bin/mothersauce man --raw | head -1
 
   # Proves the template still works after "Use this template" and a rename.
   rename:
@@ -86,7 +86,7 @@ jobs:
       - name: "Rename the package the way a new repository would"
         run: |
           python scripts/rename.py acme_widgets
-          test -d src/acme_widgets && test ! -d src/python_template
+          test -d src/acme_widgets && test ! -d src/mothersauce
           test -f src/acme_widgets/data/acme-widgets.1 && test ! -e .claude-plugin
 
       - name: "Install and run every check under the new name"

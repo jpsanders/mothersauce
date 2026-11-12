@@ -1,4 +1,4 @@
-from python_template.python_pet import PythonPet
+from mothersauce.python_pet import PythonPet
 
 
 class TestPythonPet:

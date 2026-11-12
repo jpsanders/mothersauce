@@ -1,30 +1,30 @@
-# python-template
+# mothersauce
 
 ## NAME
 
-python-template - an example command: a pet you can feed and play with
+mothersauce - an example command: a pet you can feed and play with
 
 ## SYNOPSIS
 
 ```
-python-template [--version] [command] [options]
-python-template status [--name NAME] [--json]
-python-template feed [--times N] [--name NAME] [--json]
-python-template play [--times N] [--name NAME] [--json]
-python-template guide
-python-template man [--install | --raw]
+mothersauce [--version] [command] [options]
+mothersauce status [--name NAME] [--json]
+mothersauce feed [--times N] [--name NAME] [--json]
+mothersauce play [--times N] [--name NAME] [--json]
+mothersauce guide
+mothersauce man [--install | --raw]
 ```
 
 ## DESCRIPTION
 
-`python-template` is the example command that ships with python-package-template. It keeps a pet whose state is two
+`mothersauce` is the example command that ships with python-package-template. It keeps a pet whose state is two
 numbers from 0 to 10: hunger, where 0 is full, and happiness, where 10 is happy. It exists to show the conventions a
 command made from the template follows, so replace it with your own once you have renamed the package.
 
 The conventions: every command prints a sentence for people and JSON with `--json`; `guide` prints this manual for
 people and agents alike; `man` shows the same text as a man page; exit status 0 means success.
 
-With no command, `python-template` runs `status`.
+With no command, `mothersauce` runs `status`.
 
 ## COMMANDS
 
@@ -34,7 +34,7 @@ With no command, `python-template` runs `status`.
 | `feed` | Lower hunger by one per feed, never below 0, then show the pet. |
 | `play` | Raise happiness by one per game, never above 10, then show the pet. |
 | `guide` | Print this manual as Markdown. |
-| `man` | Show the man page. `--install` puts it where `man python-template` finds it; `--raw` prints roff. |
+| `man` | Show the man page. `--install` puts it where `man mothersauce` finds it; `--raw` prints roff. |
 
 ## OPTIONS
 
@@ -62,7 +62,7 @@ With no command, `python-template` runs `status`.
 
 ## FILES
 
-`~/.local/share/man/man1/python-template.1` is where `man --install` writes the man page, or
+`~/.local/share/man/man1/mothersauce.1` is where `man --install` writes the man page, or
 `$XDG_DATA_HOME/man/man1/` when that variable is set.
 
 ## EXAMPLES
@@ -70,19 +70,19 @@ With no command, `python-template` runs `status`.
 Feed the pet three times and read the result as JSON:
 
 ```
-python-template feed --times 3 --json
+mothersauce feed --times 3 --json
 ```
 
 Install the man page, then read it:
 
 ```
-python-template man --install
-man python-template
+mothersauce man --install
+man mothersauce
 ```
 
 ## FOR AGENTS
 
-Run commands with `--json` and parse the object; the fields are stable. `python-template guide` returns this whole
+Run commands with `--json` and parse the object; the fields are stable. `mothersauce guide` returns this whole
 manual, so an agent can learn the command without browsing. Nothing here touches the network or the disk, except
 `man --install`, which writes one file in the user's man folder.
 

@@ -1,5 +1,5 @@
 """
-The command line: ``python-template``.
+The command line: ``mothersauce``.
 
 Every command takes ``--json``, so scripts and AI agents read the same facts people do. ``guide`` prints the full
 manual and ``man`` shows, or installs, the man page built from it.
@@ -15,10 +15,10 @@ from collections.abc import Callable, Sequence
 from importlib import resources
 from pathlib import Path
 
-from python_template import __version__
-from python_template.python_pet import PythonPet
+from mothersauce import __version__
+from mothersauce.python_pet import PythonPet
 
-PROG = "python-template"
+PROG = "mothersauce"
 
 
 def _data(name: str) -> str:
@@ -28,7 +28,7 @@ def _data(name: str) -> str:
     :param name: File name inside ``data``
     :returns: Its text
     """
-    return (resources.files("python_template") / "data" / name).read_text(encoding="utf-8")
+    return (resources.files("mothersauce") / "data" / name).read_text(encoding="utf-8")
 
 
 def _emit(pet: PythonPet, as_json: bool) -> int:
@@ -102,7 +102,7 @@ def man_folder() -> Path:
 
 def cmd_man(args: argparse.Namespace) -> int:
     """
-    Show the man page, print it as roff, or install it so ``man python-template`` works.
+    Show the man page, print it as roff, or install it so ``man mothersauce`` works.
 
     :param args: Parsed arguments
     :returns: Exit code
@@ -116,7 +116,7 @@ def cmd_man(args: argparse.Namespace) -> int:
         return 0
     man = shutil.which("man")
     if man and sys.stdout.isatty() and not args.raw:
-        with resources.as_file(resources.files("python_template") / "data" / f"{PROG}.1") as path:
+        with resources.as_file(resources.files("mothersauce") / "data" / f"{PROG}.1") as path:
             return subprocess.call([man, "-l", str(path)])  # nosec B603: man, fixed arguments
     print(page, end="")
     return 0

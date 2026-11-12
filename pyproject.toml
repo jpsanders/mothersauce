@@ -3,7 +3,7 @@ requires = ["setuptools>=80", "setuptools_scm[toml]>=9"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "python-template"
+name = "mothersauce"
 authors = [
   { name = "James Phillip Sanders", email = "hello@jamesphillipsanders.com" }
 ]
@@ -52,7 +52,7 @@ dev = [
 ]
 
 [project.scripts]
-python-template = "python_template.cli:main"
+mothersauce = "mothersauce.cli:main"
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0"
@@ -61,7 +61,7 @@ fallback_version = "0.0.0"
 where = ["src"]
 
 [tool.setuptools.package-data]
-python_template = ["py.typed", "data/*"]
+mothersauce = ["py.typed", "data/*"]
 
 [tool.mypy]
 strict = true
@@ -77,7 +77,7 @@ ignore_missing_imports = true
 [tool.isort]
 profile = "black"
 line_length = 120
-known_first_party = ["python_template"]
+known_first_party = ["mothersauce"]
 
 [tool.black]
 line-length = 120

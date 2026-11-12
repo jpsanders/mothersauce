@@ -10,7 +10,7 @@ not in a public issue. You will get an answer within a week.
 
 Nothing runs until you run it. `make init-dev` installs the development tools from PyPI into your active environment.
 `make rename` rewrites tracked files in the repository it lives in, and nothing outside it. The example command reads
-nothing and sends nothing; `python-template man --install` writes one file to your per user man folder.
+nothing and sends nothing; `mothersauce man --install` writes one file to your per user man folder.
 
 ## What it checks for you
 
