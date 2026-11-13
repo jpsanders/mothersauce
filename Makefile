@@ -1,7 +1,7 @@
 SRC := src
 TESTS := tests
 SCRIPTS := scripts
-ROOT_EC_FILES := $(wildcard *.yaml *.yml *.md) .github
+ROOT_EC_FILES := $(wildcard *.yaml *.yml *.md *.toml *.json) .github docs
 PACKAGE := mothersauce
 DOCKER_IMAGE := mothersauce:latest
 
@@ -79,13 +79,26 @@ mypy:
 pytest:
 	@echo
 	@echo --- Pytest regression and unit tests ---
-	pytest --cov ${SRC}/${PACKAGE} ${TESTS}
+	pytest --cov ${SRC}/${PACKAGE} ${SRC} ${TESTS}
 
 .PHONY: bandit
 bandit:
 	@echo
 	@echo --- Bandit security checks ---
 	bandit -c pyproject.toml -f custom -r ${SRC} ${TESTS} ${SCRIPTS}
+
+.PHONY: docs-check
+docs-check:
+	@echo
+	@echo --- Recipe menu, skill copy and llms.txt up to date ---
+	python scripts/build_docs.py --check
+
+# Build docs/RECIPES.md, the manual's recipe list, the skill copy and llms.txt from data/recipes.toml
+.PHONY: docs
+docs:
+	@echo
+	@echo --- Build the recipe docs ---
+	python scripts/build_docs.py
 
 .PHONY: man-check
 man-check:
@@ -95,22 +108,29 @@ man-check:
 
 # Build the man page and the packaged manual from docs/MANUAL.md
 .PHONY: man
-man:
+man: docs
 	@echo
 	@echo --- Build the man page ---
 	python scripts/build_man.py
+
+# How fast the command starts: lazy imports keep it light
+.PHONY: bench
+bench:
+	@echo
+	@echo --- Start up time, best of 20 runs ---
+	python scripts/bench_startup.py
+
+# Run every recipe's demo, the way a reader would taste them
+.PHONY: demo
+demo:
+	@echo
+	@for r in $$(mothersauce list --kind code --ids); do echo "=== $$r"; mothersauce run $$r || exit 1; done
 
 .PHONY: build
 build: clean
 	@echo
 	@echo --- Build package wheel ---
 	python -m build -o build/dist
-
-# Rename the package once, right after creating a repository from the template
-.PHONY: rename
-rename:
-	@test -n "$(NAME)" || (echo "usage: make rename NAME=your_package" && exit 1)
-	python scripts/rename.py $(NAME)
 
 .PHONY: build-docker
 build-docker:
@@ -126,4 +146,4 @@ clean:
 
 # Run all checking tools
 .PHONY: checks
-checks: isort-check black-check ec docstyle lint mypy bandit man-check pytest
+checks: isort-check black-check ec docstyle lint mypy bandit docs-check man-check pytest

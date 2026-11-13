@@ -40,6 +40,10 @@ on:
         type: boolean
         default: true
 
+      enable-docs:
+        type: boolean
+        default: true
+
       checkout-fetch-depth:
         type: number
         default: 1
@@ -106,3 +110,9 @@ jobs:
         if: ${{ inputs.enable-mypy && (success() || failure()) }}
         run: |
           make mypy
+
+      - name: "Check the generated docs and the man page are up to date"
+        if: ${{ inputs.enable-docs && (success() || failure()) }}
+        run: |
+          make docs-check
+          make man-check

@@ -1,94 +1,309 @@
-.TH PYTHON-TEMPLATE 1 "" "mothersauce" "User Commands"
+.TH MOTHERSAUCE 1 "" "mothersauce" "User Commands"
 .SH NAME
-mothersauce \- an example command: a pet you can feed and play with
+mothersauce \- the base recipes of production Python, typed, tested and served to your AI agent
 .SH SYNOPSIS
 .RS 4
 .nf
-python\-template [\-\-version] [command] [options]
-python\-template status [\-\-name NAME] [\-\-json]
-python\-template feed [\-\-times N] [\-\-name NAME] [\-\-json]
-python\-template play [\-\-times N] [\-\-name NAME] [\-\-json]
-python\-template guide
-python\-template man [\-\-install | \-\-raw]
+mothersauce [\-\-version] [command] [options]
+mothersauce list [\-\-section SECTION] [\-\-kind code|practice] [\-\-ids] [\-\-json]
+mothersauce show RECIPE [\-\-notes | \-\-code] [\-\-json]
+mothersauce run RECIPE
+mothersauce search WORDS... [\-\-limit N] [\-\-json]
+mothersauce style [\-\-agents]
+mothersauce guide
+mothersauce man [\-\-install | \-\-raw]
+mothersauce mcp
+mothersauce integrate [HARNESS...] [\-\-dry\-run] [\-\-json]
+mothersauce skill
+mothersauce doctor [\-\-json]
 .fi
 .RE
 .SH DESCRIPTION
 .PP
-\fBpython\-template\fR is the example command that ships with python-package-template. It keeps a pet whose state is two numbers from 0 to 10: hunger, where 0 is full, and happiness, where 10 is happy. It exists to show the conventions a command made from the template follows, so replace it with your own once you have renamed the package.
+Every cuisine rests on a handful of mother sauces; learn them and every other sauce is a variation. Production Python is the same: a few dozen patterns carry almost every codebase. mothersauce collects them as recipes.
 .PP
-The conventions: every command prints a sentence for people and JSON with \fB\-\-json\fR; \fBguide\fR prints this manual for people and agents alike; \fBman\fR shows the same text as a man page; exit status 0 means success.
+A code recipe is one small module of Python 3.15 with full type hints, Sphinx docstrings, a \fBdemo()\fR you can run, and its own tests. A practice recipe is a short guide to the work around the code: the workflow, the layout, the style, the tests. Every recipe has a card that says when to use it and when not to.
 .PP
-With no command, \fBpython\-template\fR runs \fBstatus\fR.
+The recipes share one example domain, a restaurant's ticket feed, so they read as one system: the pipeline recipe loads that feed using all the others. Copy the shape of a recipe, not its names.
+.PP
+The same recipes reach people and agents four ways: this command, this manual (\fBguide\fR, \fBman\fR), an MCP server (\fBmcp\fR) and an agent skill (\fBskill\fR, \fBintegrate\fR). With no command, \fBmothersauce\fR prints the menu.
 .SH COMMANDS
 .TP
-\fBstatus\fR
-Show the pet as it starts: hunger 5, happiness 5.
+\fBlist\fR
+Print the menu, every recipe by section. \fB\-\-section\fR and \fB\-\-kind\fR filter it; \fB\-\-ids\fR prints ids only.
 .TP
-\fBfeed\fR
-Lower hunger by one per feed, never below 0, then show the pet.
+\fBshow RECIPE\fR
+Print a recipe: card, notes and tested source. \fB\-\-notes\fR drops the source; \fB\-\-code\fR keeps it alone.
 .TP
-\fBplay\fR
-Raise happiness by one per game, never above 10, then show the pet.
+\fBrun RECIPE\fR
+Run a code recipe's demo. Practice recipes have no demo; read them with \fBshow\fR.
+.TP
+\fBsearch WORDS\fR
+Rank the recipes for a problem described in a few words, best first.
+.TP
+\fBstyle\fR
+Print the house style. \fB\-\-agents\fR prints a short block to paste into a project's AGENTS.md or CLAUDE.md.
 .TP
 \fBguide\fR
 Print this manual as Markdown.
 .TP
 \fBman\fR
-Show the man page. \fB\-\-install\fR puts it where \fBman python\-template\fR finds it; \fB\-\-raw\fR prints roff.
+Show this manual as a man page. \fB\-\-install\fR puts it where \fBman mothersauce\fR finds it; \fB\-\-raw\fR prints roff.
+.TP
+\fBmcp\fR
+Serve the recipes to an AI agent over the Model Context Protocol, on standard input and output.
+.TP
+\fBintegrate\fR
+Register the MCP server and install the skill in Claude Code, Codex, OpenCode, Gemini CLI and Cursor.
+.TP
+\fBskill\fR
+Print the agent skill.
+.TP
+\fBdoctor\fR
+Check the install: Python, pydantic, the recipes; and report the man page, the skill and pyenv.
+.PP
+A recipe can be named by its id (\fBcontext\-managers\fR), with underscores or spaces (\fBcontext_managers\fR), by its title, or by its module's name (\fBvalue_objects\fR finds \fBdataclasses\fR). A near miss suggests the closest ids.
 .SH OPTIONS
 .TP
-\fB\-\-name NAME\fR
-The pet's name. Default: Baby Python.
-.TP
-\fB\-\-times N\fR
-How many times to feed or play, 1 to 10. Default: 1.
-.TP
 \fB\-\-json\fR
-Print one JSON object instead of a sentence.
+Print one JSON document instead of text: \fBlist\fR, \fBshow\fR, \fBsearch\fR, \fBintegrate\fR, \fBdoctor\fR.
+.TP
+\fB\-\-section SECTION\fR
+With \fBlist\fR: only one section, such as "Mother sauces".
+.TP
+\fB\-\-kind KIND\fR
+With \fBlist\fR: only \fBcode\fR recipes, or only \fBpractice\fR recipes.
+.TP
+\fB\-\-ids\fR
+With \fBlist\fR: one id per line, for scripts.
+.TP
+\fB\-\-notes\fR, \fB\-\-code\fR
+With \fBshow\fR: the card and notes only, or the source only.
+.TP
+\fB\-\-limit N\fR
+With \fBsearch\fR: at most N results. Default: 5.
+.TP
+\fB\-\-agents\fR
+With \fBstyle\fR: the short block for an agent's instructions file.
+.TP
+\fB\-\-install\fR, \fB\-\-raw\fR
+With \fBman\fR: install the man page, or print its roff source.
+.TP
+\fB\-\-dry\-run\fR
+With \fBintegrate\fR: say what would change and change nothing.
 .TP
 \fB\-\-version\fR
 Print the version and exit.
 .TP
 \fB\-\-help\fR
-Print the options of a command and exit.
-.SH JSON OUTPUT
+Print a command's options and exit.
+.SH RECIPES
 .PP
-\fBstatus\fR, \fBfeed\fR and \fBplay\fR print one object with three fields:
+The menu runs like a kitchen: prepare, cook the bases, work the line, run the service, check at the pass.
+.SS Mise en place
+.TP
+\fBworkflow\fR
+pyenv and pyenv-virtualenv, make targets, and CI that runs exactly what your machine runs.
+.TP
+\fBlayout\fR
+The src layout: one package, one concept per module, tests that mirror it, data shipped inside.
+.TP
+\fBstyle\fR
+Nine checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more.
+.SS Mother sauces
+.TP
+\fBdataclasses\fR
+Small, honest value objects: frozen, slotted, validated, replaced rather than mutated.
+.TP
+\fBpydantic\fR
+Parse, don't validate, at the edges: strict models, reusable constraints, discriminated unions.
+.TP
+\fBenums\fR
+Closed sets of names: StrEnum, IntEnum, Flag, a state machine, and exhaustive match with assert_never.
+.TP
+\fBabstractions\fR
+ABCs for families you own, with a template method; Protocols for shapes you accept.
+.TP
+\fBfactories\fR
+Decide which class to build in one place: registries, __init_subclass__, from_ constructors, plugins.
+.TP
+\fBgenerics\fR
+Write the container once and keep every type: PEP 695 syntax, bounds, defaults, ParamSpec, Result.
+.TP
+\fBgenerators\fR
+Any size of input in the memory of one record: streams, stages, batches, windows, send, cursors.
+.TP
+\fBcontext\-managers\fR
+Every acquire paired with its release: timers, atomic writes, nested transactions, ExitStack.
+.TP
+\fBdecorators\fR
+Cross cutting behaviour written once: typed retry with backoff and jitter, caches, singledispatch.
+.TP
+\fBoop\fR
+Composition over inheritance, dunder protocols, properties, descriptors and __slots__.
+.TP
+\fBdata\-structures\fR
+The container that makes the code obvious: Counter, deque, heapq, bisect, ChainMap, graphlib.
+.TP
+\fBerrors\fR
+A hierarchy you can catch, chains you can follow, and batches that report every failure at once.
+.SS On the line
+.TP
+\fBsql\fR
+Injection proof queries with t-strings, schema evolution, idempotent upserts and high watermarks.
+.TP
+\fBdata\-quality\fR
+Rules as data, severities, quarantine, and overrides with an audit trail.
+.TP
+\fBpipeline\fR
+Every recipe plated together: a small, real ETL with quality rules, upserts, watermarks and JSON logs.
+.SS Service
+.TP
+\fBlogging\fR
+JSON lines with a run id from a ContextVar, secrets redacted, configured once with dictConfig.
+.TP
+\fBconfig\fR
+One frozen settings object from defaults, TOML, environment and flags, with where each value came from.
+.TP
+\fBconcurrency\fR
+Wait for many slow things at once, bounded, in order, without losing a single error.
+.TP
+\fBperformance\fR
+Measure first, then make the common path cheap: lazy imports, timeit, import costs.
+.TP
+\fBcli\fR
+This package's own CLI: subcommands, --json on everything, real exit codes, a man page, lazy imports.
+.TP
+\fBmcp\-server\fR
+This package's own MCP server: JSON-RPC over stdio with tools, resources and prompts.
+.SS The pass
+.TP
+\fBtesting\fR
+Fixtures, parametrize, fakes over mocks, doctests and a coverage gate: nothing broken leaves the pass.
+.TP
+\fBbdd\fR
+Gherkin features run by pytest-bdd: behaviour written so a person can read it and pytest can run it.
+.SH FOR AI AGENTS
+.PP
+Everything a person reads, an agent can read too. Run commands with \fB\-\-json\fR and parse the document; the fields are stable. \fBmothersauce guide\fR returns this whole manual, so an agent can learn the tool without a browser. No command touches the network. \fBman \-\-install\fR writes one file in the user's man folder, and \fBintegrate\fR edits the agent harnesses' own configuration, after a backup.
+.SS The MCP server
+.PP
+\fBmothersauce mcp\fR speaks the Model Context Protocol over stdio. Every tool is read only.
+.TP
+\fBsearch_recipes\fR
+The recipes for a problem: \fB{"query": "retry a flaky api call", "limit": 5}\fR.
+.TP
+\fBget_recipe\fR
+One recipe as Markdown: \fB{"id": "decorators", "part": "all"}\fR; part is \fBall\fR, \fBnotes\fR or \fBcode\fR.
+.TP
+\fBlist_recipes\fR
+Every recipe's card, optionally for one \fBsection\fR or \fBkind\fR.
+.TP
+\fBget_style_guide\fR
+The house style.
+.PP
+It also offers every recipe as a resource, \fBmothersauce://recipes/<id>\fR, the style guide as \fBmothersauce://style\fR, and two prompts: \fBapply_recipe\fR (a recipe and a task) and \fBreview_python\fR (code to review against the style).
+.PP
+Add it to any MCP client by hand:
 .RS 4
 .nf
-{"name": "Baby Python", "hunger": 4, "happiness": 5}
+{"mcpServers": {"mothersauce": {"command": "mothersauce", "args": ["mcp"]}}}
 .fi
 .RE
 .PP
-\fBname\fR is a string; \fBhunger\fR and \fBhappiness\fR are integers from 0 to 10.
-.SH EXIT STATUS
-.PP
-0 on success. 2 when the arguments are wrong, with the reason on standard error.
-.SH FILES
-.PP
-\fB~/.local/share/man/man1/python\-template.1\fR is where \fBman \-\-install\fR writes the man page, or \fB$XDG_DATA_HOME/man/man1/\fR when that variable is set.
-.SH EXAMPLES
-.PP
-Feed the pet three times and read the result as JSON:
+or without installing anything first, through uv:
 .RS 4
 .nf
-python\-template feed \-\-times 3 \-\-json
+{"mcpServers": {"mothersauce": {"command": "uvx",
+  "args": ["\-\-from", "git+https://github.com/jpsanders/mothersauce", "mothersauce", "mcp"]}}}
+.fi
+.RE
+.SS The skill and the plugin
+.PP
+\fBmothersauce integrate\fR finds the harnesses installed for the current user and, for each, registers the server and installs the skill, using the harness's own command line when it has one. The repository is also a Claude Code plugin, with the skill and the server in one step:
+.RS 4
+.nf
+/plugin install mothersauce \-\-marketplace jpsanders/mothersauce
+.fi
+.RE
+.PP
+On Claude Code before 2.1.275, add the marketplace first with \fB/plugin marketplace add jpsanders/mothersauce\fR, then run \fB/plugin install mothersauce@mothersauce\fR.
+.PP
+\fBmothersauce skill\fR prints the skill for any other harness, and \fBnpx skills add jpsanders/mothersauce\fR installs it in the harnesses that tool knows.
+.SS One line in AGENTS.md
+.PP
+\fBmothersauce style \-\-agents\fR prints a short block for a project's AGENTS.md or CLAUDE.md. It tells any agent working in that project to write Python the way the recipes do and to look patterns up before writing them.
+.SH THE WORKFLOW
+.PP
+The repository is built on python-package-template and keeps its workflow: a pyenv virtual environment per project, one Makefile for every command, and CI that runs exactly what the Makefile runs.
+.RS 4
+.nf
+pyenv install 3.15.2
+pyenv virtualenv 3.15.2 mothersauce
+pyenv local mothersauce
+make init\-dev
+make checks
+.fi
+.RE
+.PP
+\fBmake checks\fR runs isort, black, editorconfig-checker, darglint, flake8, mypy in strict mode, bandit, the docs and man page freshness checks, and pytest with doctests, pytest-bdd scenarios and a coverage floor of 95%. \fBmake docs\fR and \fBmake man\fR rebuild the generated documents, \fBmake bench\fR times the start up, and \fBmake demo\fR runs every demo. The \fBworkflow\fR recipe has the details: \fBmothersauce show workflow\fR.
+.SH JSON OUTPUT
+.PP
+\fBlist \-\-json\fR prints an array of recipe cards with the fields \fBid\fR, \fBsection\fR, \fBtitle\fR, \fBkind\fR, \fBsummary\fR, \fBtags\fR, \fBpython\fR, \fBuse_when\fR, \fBavoid_when\fR, \fBrelated\fR, \fBsource_path\fR, \fBtests_path\fR and \fBrun\fR. \fBshow \-\-json\fR prints one card with \fBnotes\fR and \fBsource\fR added. \fBsearch \-\-json\fR prints an array of objects with \fBid\fR, \fBtitle\fR, \fBsummary\fR and \fBscore\fR, best first. \fBdoctor \-\-json\fR prints an array of checks with \fBcheck\fR, \fBok\fR, \fBrequired\fR and \fBdetail\fR.
+.SH EXIT STATUS
+.PP
+0 on success. 1 when a search finds nothing, a required check fails, or \fBintegrate\fR finds no harness or a step fails. 2 when the arguments are wrong, such as an unknown recipe, with the reason on standard error.
+.SH ENVIRONMENT
+.TP
+\fBXDG_DATA_HOME\fR
+Where \fBman \-\-install\fR writes: \fB$XDG_DATA_HOME/man/man1\fR. Default: \fB~/.local/share/man/man1\fR.
+.TP
+\fBCLAUDE_CONFIG_DIR\fR
+The Claude Code folder \fBintegrate\fR uses. Default: \fB~/.claude\fR.
+.TP
+\fBCODEX_HOME\fR
+The Codex folder \fBintegrate\fR uses. Default: \fB~/.codex\fR.
+.TP
+\fBXDG_CONFIG_HOME\fR
+Where \fBintegrate\fR looks for OpenCode. Default: \fB~/.config\fR.
+.SH FILES
+.PP
+\fB~/.local/share/man/man1/mothersauce.1\fR is the installed man page. \fBintegrate\fR writes \fBskills/mothersauce/SKILL.md\fR in each harness's folder and leaves a backup named \fB*.mothersauce.bak\fR next to any configuration file it edits.
+.SH EXAMPLES
+.PP
+Find and read the recipe for a problem:
+.RS 4
+.nf
+mothersauce search retry a flaky api call
+mothersauce show decorators \-\-notes
+.fi
+.RE
+.PP
+Run the pipeline that uses every other recipe:
+.RS 4
+.nf
+mothersauce run pipeline
+.fi
+.RE
+.PP
+Give every agent harness on this machine the server and the skill, after a dry run:
+.RS 4
+.nf
+mothersauce integrate \-\-dry\-run
+mothersauce integrate
 .fi
 .RE
 .PP
 Install the man page, then read it:
 .RS 4
 .nf
-python\-template man \-\-install
-man python\-template
+mothersauce man \-\-install
+man mothersauce
 .fi
 .RE
-.SH FOR AGENTS
-.PP
-Run commands with \fB\-\-json\fR and parse the object; the fields are stable. \fBpython\-template guide\fR returns this whole manual, so an agent can learn the command without browsing. Nothing here touches the network or the disk, except \fBman \-\-install\fR, which writes one file in the user's man folder.
 .SH SEE ALSO
 .PP
-The template and its checks: https://github.com/jpsanders/python-package-template
+The repository: https://github.com/jpsanders/mothersauce. The template it is built on: https://github.com/jpsanders/python-package-template. The Model Context Protocol: https://modelcontextprotocol.io.
 .SH AUTHOR
 .PP
 James Phillip Sanders, https://jamesphillipsanders.com

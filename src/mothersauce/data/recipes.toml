@@ -1,0 +1,328 @@
+# The catalogue: one entry per recipe. The CLI, the MCP server, the man page and docs/RECIPES.md all read this file.
+# A code recipe names its module; a practice recipe names a Markdown file in data/practice/.
+# Sections run like a kitchen: prepare, cook the bases, work the line, run the service, check at the pass.
+
+[[recipe]]
+id = "workflow"
+section = "Mise en place"
+title = "The local and CI workflow"
+practice = "workflow.md"
+summary = "pyenv and pyenv-virtualenv, make targets, and CI that runs exactly what your machine runs."
+tags = ["pyenv", "virtualenv", "make", "ci", "github actions", "releases", "setuptools_scm", "template"]
+python = ["pyenv install 3.15.2", "pyenv virtualenv", "make checks", "reusable workflows", "tags without v"]
+use_when = ["Starting any Python repository", "CI and local results disagree", "Cutting a release"]
+avoid_when = ["A single throwaway script, where a virtual environment is enough"]
+related = ["layout", "style", "testing"]
+
+[[recipe]]
+id = "layout"
+section = "Mise en place"
+title = "Code layout"
+practice = "layout.md"
+summary = "The src layout: one package, one concept per module, tests that mirror it, data shipped inside."
+tags = ["src layout", "packages", "modules", "py.typed", "entry points", "importlib.resources"]
+python = ["src/ layout", "__all__", "py.typed", "__main__.py", "[project.scripts]", "importlib.resources"]
+use_when = ["Laying out a new package", "A module has grown past one idea"]
+avoid_when = ["Splitting a 200 line module into ten files before it needs it"]
+related = ["workflow", "style", "cli"]
+
+[[recipe]]
+id = "style"
+section = "Mise en place"
+title = "Code style"
+practice = "style.md"
+summary = "Nine checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more."
+tags = ["black", "isort", "flake8", "mypy", "bandit", "docstrings", "naming", "typing"]
+python = ["black 120", "mypy --strict", "Sphinx docstrings", "absolute imports", "# nosec <code>  # reason"]
+use_when = ["Agreeing how code should look before the first review", "Briefing an AI agent on house rules"]
+avoid_when = ["Reformatting a whole legacy codebase in the same pull request as a fix"]
+related = ["workflow", "layout", "testing"]
+
+[[recipe]]
+id = "dataclasses"
+section = "Mother sauces"
+title = "Dataclasses"
+module = "mothersauce.recipes.value_objects"
+summary = "Small, honest value objects: frozen, slotted, validated, replaced rather than mutated."
+tags = ["dataclasses", "value objects", "immutability", "slots", "money", "watermark"]
+python = ["@dataclass(frozen, slots, kw_only, order)", "field(init=False)", "InitVar", "copy.replace", "ClassVar"]
+use_when = ["Data with a little behaviour", "Values passed between your own functions", "Keys and watermarks"]
+avoid_when = ["Untrusted input from outside: parse it with pydantic first"]
+related = ["pydantic", "oop", "enums"]
+
+[[recipe]]
+id = "pydantic"
+section = "Mother sauces"
+title = "Pydantic models"
+module = "mothersauce.recipes.models"
+summary = "Parse, don't validate, at the edges: strict models, reusable constraints, discriminated unions."
+tags = ["pydantic", "validation", "parsing", "json", "schema", "events"]
+python = ["BaseModel", "ConfigDict(frozen, extra='forbid')", "Annotated constraints", "field_validator",
+          "model_validator", "computed_field", "Field(discriminator)", "TypeAdapter"]
+use_when = ["Reading JSON, CSV, queues or requests", "Publishing a data contract as JSON schema"]
+avoid_when = ["Hot inner loops over data you already validated: use dataclasses there"]
+related = ["dataclasses", "config", "errors"]
+
+[[recipe]]
+id = "enums"
+section = "Mother sauces"
+title = "Enums"
+module = "mothersauce.recipes.enums"
+summary = "Closed sets of names: StrEnum, IntEnum, Flag, a state machine, and exhaustive match with assert_never."
+tags = ["enum", "StrEnum", "Flag", "state machine", "match", "exhaustiveness"]
+python = ["StrEnum", "auto()", "IntEnum", "Flag", "@unique", "match", "assert_never", "frozendict"]
+use_when = ["A field takes one of a known set of values", "Statuses that move through a lifecycle"]
+avoid_when = ["Values that grow at run time, such as customer names"]
+related = ["dataclasses", "data-quality"]
+
+[[recipe]]
+id = "abstractions"
+section = "Mother sauces"
+title = "Abstractions: ABC and Protocol"
+module = "mothersauce.recipes.abstractions"
+summary = "ABCs for families you own, with a template method; Protocols for shapes you accept."
+tags = ["abc", "protocol", "template method", "dependency inversion", "interfaces", "duck typing"]
+python = ["ABC", "@abstractmethod", "Protocol", "@runtime_checkable", "itertools.batched", "type aliases"]
+use_when = ["Several implementations of one job", "Code that should accept fakes in tests"]
+avoid_when = ["One implementation with no second in sight: write the class, abstract later"]
+related = ["factories", "generics", "oop"]
+
+[[recipe]]
+id = "factories"
+section = "Mother sauces"
+title = "Factories"
+module = "mothersauce.recipes.factories"
+summary = "Decide which class to build in one place: registries, __init_subclass__, from_ constructors, plugins."
+tags = ["factory", "registry", "plugins", "entry points", "open closed", "alternative constructors"]
+python = ["__init_subclass__", "decorator registry", "@classmethod from_url", "Self", "frozendict",
+          "importlib.metadata.entry_points"]
+use_when = ["Choosing an implementation from configuration", "Letting other packages add formats"]
+avoid_when = ["Two cases that will never become three: an if is clearer"]
+related = ["abstractions", "decorators", "config"]
+
+[[recipe]]
+id = "generics"
+section = "Mother sauces"
+title = "Generics"
+module = "mothersauce.recipes.generics"
+summary = "Write the container once and keep every type: PEP 695 syntax, bounds, defaults, ParamSpec, Result."
+tags = ["generics", "typing", "TypeVar", "ParamSpec", "overload", "TypeIs", "Result"]
+python = ["class Repository[K: Hashable, V]", "def first[T]", "[S: (str, bytes)]", "[T, C = str]", "[**P, R]",
+          "@overload", "TypeIs", "type Result[T, E = str]"]
+use_when = ["Containers, repositories and helpers used with many types", "Typed decorators"]
+avoid_when = ["A function that only ever takes one type"]
+related = ["abstractions", "decorators", "errors"]
+
+[[recipe]]
+id = "generators"
+section = "Mother sauces"
+title = "Generators"
+module = "mothersauce.recipes.generators"
+summary = "Any size of input in the memory of one record: streams, stages, batches, windows, send, cursors."
+tags = ["generators", "iterators", "streaming", "lazy", "batching", "pagination", "itertools"]
+python = ["yield", "yield from", "Generator[T]", "itertools.batched", "groupby", "deque(maxlen)", "send()",
+          "(*group for group in groups)", "__iter__ / __next__"]
+use_when = ["Reading files, APIs or queries too big for memory", "Pipelines of small stages"]
+avoid_when = ["You need random access or several passes: build a list"]
+related = ["context-managers", "concurrency", "pipeline"]
+
+[[recipe]]
+id = "context-managers"
+section = "Mother sauces"
+title = "Context managers"
+module = "mothersauce.recipes.context_managers"
+summary = "Every acquire paired with its release: timers, atomic writes, nested transactions, ExitStack."
+tags = ["contextlib", "with", "transactions", "savepoints", "atomic write", "cleanup", "resources"]
+python = ["@contextmanager", "__enter__ / __exit__", "Literal[False]", "ExitStack", "suppress", "chdir",
+          "os.replace"]
+use_when = ["Anything that must be closed, released, committed or restored", "Temporary state in tests"]
+avoid_when = ["Cleanup that does not exist: a with block that does nothing is noise"]
+related = ["errors", "sql", "generators"]
+
+[[recipe]]
+id = "decorators"
+section = "Mother sauces"
+title = "Decorators"
+module = "mothersauce.recipes.decorators"
+summary = "Cross cutting behaviour written once: typed retry with backoff and jitter, caches, singledispatch."
+tags = ["decorators", "retry", "backoff", "caching", "singledispatch", "deprecation", "functools"]
+python = ["functools.wraps", "[**P, R]", "retry with full jitter", "cache", "lru_cache", "cached_property",
+          "singledispatch", "warnings.deprecated"]
+use_when = ["The same wrapper logic on many functions", "Retrying transient network errors"]
+avoid_when = ["Logic specific to one function: put it in the function"]
+related = ["generics", "errors", "performance"]
+
+[[recipe]]
+id = "oop"
+section = "Mother sauces"
+title = "Object oriented design"
+module = "mothersauce.recipes.oop"
+summary = "Composition over inheritance, dunder protocols, properties, descriptors and __slots__."
+tags = ["oop", "composition", "descriptors", "properties", "dunder methods", "slots", "total_ordering"]
+python = ["__set_name__", "@property", "__eq__ and __hash__", "__len__ / __iter__ / __contains__",
+          "@total_ordering", "__slots__", "@classmethod", "@staticmethod"]
+use_when = ["Objects with state and rules", "Classes that should feel like built in types"]
+avoid_when = ["Plain data: a dataclass says it in fewer lines"]
+related = ["dataclasses", "abstractions", "data-structures"]
+
+[[recipe]]
+id = "data-structures"
+section = "Mother sauces"
+title = "Data structures"
+module = "mothersauce.recipes.data_structures"
+summary = "The container that makes the code obvious: Counter, deque, heapq, bisect, ChainMap, graphlib."
+tags = ["collections", "heapq", "bisect", "lru cache", "dag", "topological sort", "frozendict", "TypedDict"]
+python = ["defaultdict", "Counter", "OrderedDict", "ChainMap", "heapq.merge", "bisect", "frozendict",
+          "NamedTuple", "TypedDict(closed=True)", "graphlib.TopologicalSorter"]
+use_when = ["Grouping, counting, ranking, merging or scheduling", "A list doing a set's job"]
+avoid_when = ["Reaching for a library before checking collections, heapq and graphlib"]
+related = ["generators", "performance", "oop"]
+
+[[recipe]]
+id = "errors"
+section = "Mother sauces"
+title = "Errors"
+module = "mothersauce.recipes.errors"
+summary = "A hierarchy you can catch, chains you can follow, and batches that report every failure at once."
+tags = ["exceptions", "ExceptionGroup", "except*", "raise from", "add_note", "error handling"]
+python = ["class KitchenError(Exception)", "raise ... from error", "add_note", "ExceptionGroup", "except*",
+          "except ValueError, TypeError:"]
+use_when = ["A package other code depends on", "Batch jobs where one bad record must not stop the rest"]
+avoid_when = ["Exceptions for normal control flow in hot loops"]
+related = ["data-quality", "logging", "context-managers"]
+
+[[recipe]]
+id = "sql"
+section = "On the line"
+title = "SQL loading"
+module = "mothersauce.recipes.sql"
+summary = "Injection proof queries with t-strings, schema evolution, idempotent upserts and high watermarks."
+tags = ["sql", "sqlite", "t-strings", "injection", "upsert", "schema evolution", "incremental load", "etl"]
+python = ['t"..."', "string.templatelib", "{table:id}", "ON CONFLICT DO UPDATE", "executemany", "PRAGMA table_info"]
+use_when = ["Loading records into a database", "Any SQL that includes a value from outside"]
+avoid_when = ["Building SQL with f-strings, ever"]
+related = ["context-managers", "pipeline", "data-quality"]
+
+[[recipe]]
+id = "data-quality"
+section = "On the line"
+title = "Data quality"
+module = "mothersauce.recipes.quality"
+summary = "Rules as data, severities, quarantine, and overrides with an audit trail."
+tags = ["data quality", "validation rules", "bad rows", "duplicates", "quarantine", "overrides", "audit", "severity"]
+python = ["decorator registry", "frozen dataclasses", "IntEnum severity", "Counter", "except A, B, C:"]
+use_when = ["Loads where some bad rows are expected", "Known exceptions that need an approver"]
+avoid_when = ["Structural parsing, which belongs in a pydantic model"]
+related = ["pipeline", "pydantic", "enums"]
+
+[[recipe]]
+id = "pipeline"
+section = "On the line"
+title = "The pipeline"
+module = "mothersauce.recipes.pipeline"
+summary = "Every recipe plated together: a small, real ETL with quality rules, upserts, watermarks and JSON logs."
+tags = ["etl", "pipeline", "data engineering", "incremental", "end to end", "composition"]
+python = ["make_source", "check_batch", "FeedLine model", "upsert", "Watermark", "log_context", "Summary"]
+use_when = ["Seeing how the recipes compose in one place", "Starting an ingestion job"]
+avoid_when = ["Copying it whole: take the parts your job needs"]
+related = ["sql", "data-quality", "generators"]
+
+[[recipe]]
+id = "logging"
+section = "Service"
+title = "Structured logging"
+module = "mothersauce.recipes.logs"
+summary = "JSON lines with a run id from a ContextVar, secrets redacted, configured once with dictConfig."
+tags = ["logging", "log", "json logs", "contextvars", "observability", "redaction", "dictConfig"]
+python = ["logging.getLogger(__name__)", "logging.Filter", "logging.Formatter", "ContextVar", "dictConfig",
+          "extra="]
+use_when = ["Any program that runs without a person watching", "Logs that a machine will search"]
+avoid_when = ["print() in library code"]
+related = ["errors", "config", "pipeline"]
+
+[[recipe]]
+id = "config"
+section = "Service"
+title = "Configuration"
+module = "mothersauce.recipes.config"
+summary = "One frozen settings object from defaults, TOML, environment and flags, with where each value came from."
+tags = ["configuration", "settings", "toml", "environment", "secrets", "sentinel"]
+python = ["tomllib", "pydantic BaseModel", "SecretStr", "sentinel()", "int | UNSET", "deep merge"]
+use_when = ["Programs configured from more than one place", "Settings that must fail fast when wrong"]
+avoid_when = ["Reading os.environ deep inside business logic"]
+related = ["pydantic", "logging", "cli"]
+
+[[recipe]]
+id = "concurrency"
+section = "Service"
+title = "Concurrency"
+module = "mothersauce.recipes.concurrency"
+summary = "Wait for many slow things at once, bounded, in order, without losing a single error."
+tags = ["threads", "asyncio", "async", "parallel", "TaskGroup", "semaphore", "queue", "workers", "fan out"]
+python = ["ThreadPoolExecutor", "wait(FIRST_COMPLETED)", "asyncio.TaskGroup", "asyncio.Semaphore",
+          "asyncio.timeout", "queue.Queue", "sentinel()"]
+use_when = ["Many network or database calls", "A dispatcher feeding workers"]
+avoid_when = ["CPU bound work on the default build: use processes, or the free threaded build"]
+related = ["generators", "errors", "performance"]
+
+[[recipe]]
+id = "performance"
+section = "Service"
+title = "Performance"
+module = "mothersauce.recipes.performance"
+summary = "Measure first, then make the common path cheap: lazy imports, timeit, import costs."
+tags = ["performance", "speed", "slow", "fast", "lazy imports", "timeit", "profiling", "startup time", "benchmarks"]
+python = ["lazy import", "timeit.Timer", "python -X importtime", "python -m profiling.sampling", "str.join"]
+use_when = ["A command line tool that should start instantly", "Deciding between two ways with numbers"]
+avoid_when = ["Optimising code you have not measured"]
+related = ["data-structures", "generators", "cli"]
+
+[[recipe]]
+id = "cli"
+section = "Service"
+title = "Command line interface"
+module = "mothersauce.cli"
+summary = "This package's own CLI: subcommands, --json on everything, real exit codes, a man page, lazy imports."
+tags = ["cli", "argparse", "json output", "exit codes", "man page", "agents"]
+python = ["argparse subparsers", "lazy import", "--json", "importlib.resources", "sys.exit(main())"]
+use_when = ["Any tool people or agents run from a shell"]
+avoid_when = ["Interactive prompts in a tool that scripts and agents will call"]
+related = ["mcp-server", "layout", "performance"]
+
+[[recipe]]
+id = "mcp-server"
+section = "Service"
+title = "An MCP server with no dependencies"
+module = "mothersauce.mcp"
+summary = "This package's own MCP server: JSON-RPC over stdio with tools, resources and prompts."
+tags = ["mcp", "ai agents", "json-rpc", "stdio", "tools", "claude code"]
+python = ["json", "sys.stdin lines", "dispatch dict", "TypedDict", "read only tool annotations"]
+use_when = ["Giving AI agents your tool's data and actions", "A server that must start in milliseconds"]
+avoid_when = ["Streaming or authenticated remote servers: use the official SDK there"]
+related = ["cli", "abstractions", "errors"]
+
+[[recipe]]
+id = "testing"
+section = "The pass"
+title = "Testing with pytest"
+practice = "testing.md"
+summary = "Fixtures, parametrize, fakes over mocks, doctests and a coverage gate: nothing broken leaves the pass."
+tags = ["pytest", "fixtures", "parametrize", "fakes", "mocks", "doctest", "coverage"]
+python = ["@pytest.fixture", "@pytest.mark.parametrize", "tmp_path", "monkeypatch", "capsys", "--doctest-modules",
+          "fail_under"]
+use_when = ["Every change", "Pinning a bug before fixing it"]
+avoid_when = ["Asserting on log text or timing that varies between machines"]
+related = ["bdd", "style", "workflow"]
+
+[[recipe]]
+id = "bdd"
+section = "The pass"
+title = "Behaviour driven tests"
+practice = "bdd.md"
+summary = "Gherkin features run by pytest-bdd: behaviour written so a person can read it and pytest can run it."
+tags = ["bdd", "pytest-bdd", "gherkin", "acceptance tests", "given when then", "scenarios"]
+python = ["Feature / Scenario", "Given / When / Then", "scenarios()", "target_fixture", "parsers.parse",
+          "Scenario Outline"]
+use_when = ["Acceptance tests a product owner should be able to read", "End to end behaviour of a job"]
+avoid_when = ["Unit tests of one function: plain pytest says it shorter"]
+related = ["testing", "pipeline", "cli"]

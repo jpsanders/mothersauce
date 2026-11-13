@@ -10,30 +10,48 @@ authors = [
 maintainers = [
   { name = "James Phillip Sanders", email = "hello@jamesphillipsanders.com" }
 ]
-description = "Start every Python package green: Python 3.15, strict typing, eight checks, CI, releases, a man page and an agent skill wired in."
+description = "The base recipes of production Python 3.15, typed, tested and served to your AI agent."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.14"
-keywords = ["template", "packaging", "pyproject", "mypy", "pytest", "python-3.15", "man-page", "ai-agents", "claude-code"]
+requires-python = ">=3.15"
+keywords = [
+  "python",
+  "design-patterns",
+  "production",
+  "dataclasses",
+  "pydantic",
+  "generics",
+  "generators",
+  "context-managers",
+  "data-engineering",
+  "mcp",
+  "agent-skills",
+  "claude-code",
+]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
-  "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.14",
-  "Programming Language :: Python :: 3.15",
   "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
   "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.15",
+  "Topic :: Education",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Software Development :: Quality Assurance",
   "Typing :: Typed",
 ]
-dependencies = []
+dependencies = ["pydantic>=2.14"]
 dynamic = ["version"]
 
 [project.urls]
-Homepage = "https://github.com/jpsanders/python-package-template"
-Repository = "https://github.com/jpsanders/python-package-template"
-Issues = "https://github.com/jpsanders/python-package-template/issues"
-Changelog = "https://github.com/jpsanders/python-package-template/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/jpsanders/mothersauce"
+Repository = "https://github.com/jpsanders/mothersauce"
+Issues = "https://github.com/jpsanders/mothersauce/issues"
+Changelog = "https://github.com/jpsanders/mothersauce/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/jpsanders/mothersauce/blob/main/docs/MANUAL.md"
 
 [project.optional-dependencies]
 dev = [
@@ -46,8 +64,9 @@ dev = [
   "flake8-pydocstyle",
   "flake8-tidy-imports",
   "isort",
-  "mypy>=1.4.1",
+  "mypy>=2.4",
   "pytest",
+  "pytest-bdd>=8",
   "pytest-cov",
 ]
 
@@ -56,32 +75,38 @@ mothersauce = "mothersauce.cli:main"
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0"
+version_file = "src/mothersauce/_version.py"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-mothersauce = ["py.typed", "data/*"]
+mothersauce = ["py.typed", "data/*", "data/practice/*", "data/samples/*"]
 
 [tool.mypy]
 strict = true
+plugins = ["pydantic.mypy"]
+enable_error_code = ["deprecated", "ignore-without-code", "redundant-expr", "truthy-bool"]
 check_untyped_defs = true
 explicit_package_bases = true
 mypy_path = "src"
 cache_dir = "build/.mypy_cache"
 
-[[tool.mypy.overrides]]
-module = []
-ignore_missing_imports = true
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
 
 [tool.isort]
 profile = "black"
 line_length = 120
 known_first_party = ["mothersauce"]
+extend_skip = ["_version.py"]
 
 [tool.black]
 line-length = 120
 include = '\.pyi?$'
+extend-exclude = '_version\.py'
 exclude = '''
 /(
       venv
@@ -118,6 +143,17 @@ D400,D406,D407,D411,D413
 
 [tool.coverage.run]
 data_file = "build/.coverage"
+branch = true
+omit = ["src/mothersauce/__main__.py"]
+
+[tool.coverage.report]
+fail_under = 95
+show_missing = true
+skip_covered = true
+exclude_also = ["if __name__ == .__main__.:", "raise NotImplementedError", "\\.\\.\\."]
 
 [tool.pytest.ini_options]
 cache_dir = "build/.pytest_cache"
+addopts = ["--doctest-modules", "--ignore=src/mothersauce/__main__.py", "--strict-markers"]
+bdd_features_base_dir = "tests/features"
+xfail_strict = true

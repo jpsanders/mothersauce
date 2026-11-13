@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mothersauce": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/jpsanders/mothersauce@1.0.0", "mothersauce", "mcp"]
+    }
+  }
+}

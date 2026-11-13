@@ -3,16 +3,25 @@
 ## Reporting a vulnerability
 
 Please report security problems privately, through GitHub's
-[private vulnerability reporting](https://github.com/jpsanders/python-package-template/security/advisories/new),
-not in a public issue. You will get an answer within a week.
+[private vulnerability reporting](https://github.com/jpsanders/mothersauce/security/advisories/new), not in a public
+issue. You will get an answer within a week.
 
-## What the template does on your machine
+## What mothersauce does on your machine
 
-Nothing runs until you run it. `make init-dev` installs the development tools from PyPI into your active environment.
-`make rename` rewrites tracked files in the repository it lives in, and nothing outside it. The example command reads
-nothing and sends nothing; `mothersauce man --install` writes one file to your per user man folder.
+The command, the MCP server and the skill read files shipped inside the package and print them. Nothing touches the
+network. Three commands write, and only when you run them:
 
-## What it checks for you
+- `mothersauce man --install` writes one file to your per user man folder.
+- `mothersauce integrate` edits your agent harnesses' own configuration files, after a backup named
+  `*.mothersauce.bak`, and writes `skills/mothersauce/SKILL.md` in each harness's folder. `--dry-run` shows the
+  changes first.
+- `mothersauce run <recipe>` runs that recipe's demo, which writes only to temporary folders and in memory databases
+  it removes afterwards.
 
-bandit runs on every push and flags shell injection, unsafe deserialisation, weak cryptography and hardcoded
-passwords. Dependabot opens monthly updates for the GitHub Actions and the Python tools.
+The MCP server's tools are all read only, and they say so to the harness.
+
+## What the recipes teach
+
+Several recipes exist to prevent security bugs: `sql` makes injection impossible by construction, `logging` redacts
+secrets, `config` keeps passwords out of `repr` and dumps, and `dataclasses` hides a credential from tracebacks. If one
+of them falls short of what it promises, that is a vulnerability: please report it the same way.

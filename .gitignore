@@ -16,3 +16,6 @@ __pycache__
 /.venv
 /.idea
 /src/*.egg-info
+
+# Written by setuptools_scm at build and install time
+/src/mothersauce/_version.py

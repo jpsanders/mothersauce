@@ -22,8 +22,14 @@ jobs:
         with:
           python-version: "3.15"
 
-      - name: "Check the README badge names this version"
-        run: grep -q "badge/release-${{ github.event.release.tag_name }}-" README.md
+      - name: "Check the README badge, the plugin and the MCP config all name this version"
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          grep -q "badge/release-${TAG}-" README.md
+          grep -q "\"version\": \"${TAG}\"" .claude-plugin/plugin.json
+          grep -q "\"version\": \"${TAG}\"" .claude-plugin/marketplace.json
+          grep -q "mothersauce@${TAG}\"" .mcp.json
 
       - name: "Build the wheel and the sdist"
         run: |

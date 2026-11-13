@@ -1,14 +1,16 @@
 # Contributing
 
-Issues and pull requests are welcome.
+Issues and pull requests are welcome, new recipes most of all.
 
 ## Set up
 
 ```sh
-git clone https://github.com/jpsanders/python-package-template && cd python-package-template
-python3.15 -m venv .venv && . .venv/bin/activate
+git clone https://github.com/jpsanders/mothersauce && cd mothersauce
+pyenv install 3.15.2 && pyenv virtualenv 3.15.2 mothersauce && pyenv local mothersauce
 make init-dev
 ```
+
+Without pyenv: `python3.15 -m venv .venv && . .venv/bin/activate && make init-dev`.
 
 ## Before a pull request
 
@@ -17,14 +19,18 @@ make format      # black and isort
 make checks      # every check CI runs, in the same order
 ```
 
-`make checks` runs isort, black, editorconfig-checker, darglint, flake8, mypy in strict mode, bandit, the man page
-check and pytest with coverage. CI runs the same on Linux and macOS with Python 3.14 and 3.15, then renames the
-package to `acme_widgets` and runs everything again, so a change that breaks a new repository fails here first.
+`make checks` runs isort, black, editorconfig-checker, darglint, flake8, mypy in strict mode, bandit, the docs and man
+page freshness checks, and pytest with doctests, the pytest-bdd scenarios and a 95% coverage floor. CI runs the same
+on Linux and macOS, then installs the built wheel in a clean environment and uses every command.
 
-## Changing things
+## A good recipe
 
-- **The manual** is `docs/MANUAL.md`. `make man` rebuilds the packaged copy and the man page from it, and
-  `make checks` fails while either is stale.
-- **A file that only describes the template** (its plugin, its skill, its banners) belongs in `TEMPLATE_ONLY` in
-  `scripts/rename.py`, so a new repository does not inherit it.
-- **Commits** are signed. Tags carry the bare version, `1.2.0`, never `v1.2.0`.
+- **One pattern, one module.** If it needs a second idea, that is a second recipe.
+- **Production shaped.** The way the pattern looks in a codebase that runs every day: typed, validated, logged where
+  it matters, with the edge cases handled.
+- **Its notes say when not to.** The module docstring explains the pattern; the catalogue entry lists when to use it
+  and when to avoid it.
+- **A demo that tells a story** in a few deterministic lines, and tests that pin the behaviour, the edges included.
+- **The ticket feed as its domain,** so the recipes read as one system.
+
+AGENTS.md has the file by file steps. Commits are signed; tags carry the bare version, `1.2.0`, never `v1.2.0`.

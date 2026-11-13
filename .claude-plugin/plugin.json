@@ -1,0 +1,14 @@
+{
+  "name": "mothersauce",
+  "description": "The base recipes of production Python 3.15 for your agent: a skill that picks the right pattern and an MCP server that serves 26 typed, tested recipes.",
+  "version": "1.0.0",
+  "author": {
+    "name": "James Phillip Sanders",
+    "email": "hello@jamesphillipsanders.com",
+    "url": "https://jamesphillipsanders.com"
+  },
+  "homepage": "https://github.com/jpsanders/mothersauce",
+  "repository": "https://github.com/jpsanders/mothersauce",
+  "license": "MIT",
+  "keywords": ["python", "design-patterns", "dataclasses", "pydantic", "generics", "mcp", "skill", "code-style"]
+}

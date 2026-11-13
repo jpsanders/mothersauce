@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "mothersauce",
+  "description": "Production Python patterns for coding agents: a skill and a read only MCP server.",
+  "owner": {
+    "name": "James Phillip Sanders",
+    "email": "hello@jamesphillipsanders.com"
+  },
+  "plugins": [
+    {
+      "name": "mothersauce",
+      "description": "A skill and an MCP server that give your agent 26 typed, tested recipes for production Python.",
+      "version": "1.0.0",
+      "source": "./",
+      "category": "development",
+      "homepage": "https://github.com/jpsanders/mothersauce"
+    }
+  ]
+}

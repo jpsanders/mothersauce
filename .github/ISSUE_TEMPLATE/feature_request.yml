@@ -1,16 +1,19 @@
 ---
-name: Feature request
-description: A check, a workflow or a convention the template should carry
+name: Recipe or feature request
+description: A pattern production Python needs that the menu lacks, or a better way to serve it
 labels: ["enhancement"]
 body:
   - type: textarea
     id: problem
     attributes:
       label: The problem
-      description: What goes wrong in a new package today, or what you add by hand every time.
+      description: What you keep writing by hand, or what your agent keeps getting wrong.
     validations:
       required: true
   - type: textarea
     id: idea
     attributes:
-      label: What would help
+      label: The recipe or the change
+      description: The pattern, where it fits on the menu, and a short example if you have one.
+    validations:
+      required: true
