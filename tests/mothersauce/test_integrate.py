@@ -158,4 +158,4 @@ def test_a_broken_codex_config_is_left_alone(home: Path) -> None:
 
 def test_a_throwaway_uvx_copy_registers_uvx_itself(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(shutil, "which", lambda name: "/home/u/.cache/uv/archive-v0/abc/bin/mothersauce")
-    assert command() == ["uvx", "--from", "git+https://github.com/jpsanders/mothersauce", "mothersauce", "mcp"]
+    assert command() == ["uvx", "mothersauce", "mcp"]

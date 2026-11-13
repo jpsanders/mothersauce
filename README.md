@@ -1,24 +1,25 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/banner-dark.png">
-    <img alt="mothersauce: the base recipes of production Python" src="docs/images/banner-light.png" width="100%">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jpsanders/mothersauce/main/docs/images/banner-dark.png">
+    <img alt="mothersauce: the base recipes of production Python" src="https://raw.githubusercontent.com/jpsanders/mothersauce/main/docs/images/banner-light.png" width="100%">
   </picture>
 </p>
 
 <p align="center">
   <a href="https://github.com/jpsanders/mothersauce/actions/workflows/dev.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/jpsanders/mothersauce/dev.yml?branch=main&label=CI&logo=github"></a>
-  <a href="https://github.com/jpsanders/mothersauce/releases/latest"><img alt="Release 1.0.0" src="https://img.shields.io/badge/release-1.0.0-a95719"></a>
+  <a href="https://github.com/jpsanders/mothersauce/releases/latest"><img alt="Release 1.0.1" src="https://img.shields.io/badge/release-1.0.1-a95719"></a>
+  <a href="https://pypi.org/project/mothersauce/"><img alt="PyPI" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fpypi.org%2Fpypi%2Fmothersauce%2Fjson&query=%24.info.version&label=pypi&logo=pypi&logoColor=white&color=a95719"></a>
   <a href="https://www.python.org/downloads/"><img alt="Python 3.15" src="https://img.shields.io/badge/python-3.15-3776AB?logo=python&logoColor=white"></a>
-  <a href="#the-menu"><img alt="26 recipes" src="https://img.shields.io/badge/recipes-26-a95719"></a>
-  <a href="#for-ai-agents"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-a95719"></a>
-  <a href="#for-ai-agents"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-a95719"></a>
-  <a href="skills/mothersauce/SKILL.md"><img alt="Agent skill" src="https://img.shields.io/badge/agent-skill-a95719"></a>
+  <a href="https://github.com/jpsanders/mothersauce#the-menu"><img alt="26 recipes" src="https://img.shields.io/badge/recipes-26-a95719"></a>
+  <a href="https://github.com/jpsanders/mothersauce#for-ai-agents"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-a95719"></a>
+  <a href="https://github.com/jpsanders/mothersauce#for-ai-agents"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-a95719"></a>
+  <a href="https://github.com/jpsanders/mothersauce/blob/main/skills/mothersauce/SKILL.md"><img alt="Agent skill" src="https://img.shields.io/badge/agent-skill-a95719"></a>
   <a href="https://mypy-lang.org/"><img alt="mypy strict" src="https://img.shields.io/badge/mypy-strict-2a6db2"></a>
   <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000"></a>
-  <a href="tests/features"><img alt="Tests: pytest and pytest-bdd" src="https://img.shields.io/badge/tests-pytest%20%2B%20pytest--bdd-0A9EDC?logo=pytest&logoColor=white"></a>
-  <a href="pyproject.toml"><img alt="Coverage floor 95%" src="https://img.shields.io/badge/coverage-95%25%20floor-2ea44f"></a>
-  <a href="pyproject.toml"><img alt="One dependency" src="https://img.shields.io/badge/dependencies-1%20(pydantic)-2ea44f"></a>
-  <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-blue"></a>
+  <a href="https://github.com/jpsanders/mothersauce/blob/main/tests/features"><img alt="Tests: pytest and pytest-bdd" src="https://img.shields.io/badge/tests-pytest%20%2B%20pytest--bdd-0A9EDC?logo=pytest&logoColor=white"></a>
+  <a href="https://github.com/jpsanders/mothersauce/blob/main/pyproject.toml"><img alt="Coverage floor 95%" src="https://img.shields.io/badge/coverage-95%25%20floor-2ea44f"></a>
+  <a href="https://github.com/jpsanders/mothersauce/blob/main/pyproject.toml"><img alt="One dependency" src="https://img.shields.io/badge/dependencies-1%20(pydantic)-2ea44f"></a>
+  <a href="https://github.com/jpsanders/mothersauce/blob/main/LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-blue"></a>
   <a href="https://github.com/jpsanders/mothersauce/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/jpsanders/mothersauce"></a>
   <a href="https://github.com/jpsanders/mothersauce/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/jpsanders/mothersauce?style=flat&logo=github&color=a95719"></a>
 </p>
@@ -32,7 +33,7 @@ hints, Sphinx docstrings, a demo you can run and its own tests, plus a card that
 You read them on the command line or in a man page; your AI agent reads the same recipes over MCP or through a skill.
 
 ```sh
-uv tool install git+https://github.com/jpsanders/mothersauce
+uv tool install mothersauce
 mothersauce search "retry a flaky api call"
 mothersauce show decorators
 mothersauce run pipeline
@@ -68,35 +69,35 @@ others.
 <!-- menu:start -->
 | Section | Recipe | What it gives you |
 | --- | --- | --- |
-| Mise en place | [`workflow`](src/mothersauce/data/practice/workflow.md) | pyenv and pyenv-virtualenv, make targets, and CI that runs exactly what your machine runs. |
-| Mise en place | [`layout`](src/mothersauce/data/practice/layout.md) | The src layout: one package, one concept per module, tests that mirror it, data shipped inside. |
-| Mise en place | [`style`](src/mothersauce/data/practice/style.md) | Ten checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more. |
-| Mother sauces | [`dataclasses`](src/mothersauce/recipes/value_objects.py) | Small, honest value objects: frozen, slotted, validated, replaced rather than mutated. |
-| Mother sauces | [`pydantic`](src/mothersauce/recipes/models.py) | Parse, don't validate, at the edges: frozen models that forbid extras, reusable constraints, unions. |
-| Mother sauces | [`enums`](src/mothersauce/recipes/enums.py) | Closed sets of names: StrEnum, IntEnum, Flag, a state machine, and exhaustive match with assert_never. |
-| Mother sauces | [`abstractions`](src/mothersauce/recipes/abstractions.py) | ABCs for families you own, with a template method; Protocols for shapes you accept. |
-| Mother sauces | [`factories`](src/mothersauce/recipes/factories.py) | Decide which class to build in one place: registries, __init_subclass__, from_ constructors, plugins. |
-| Mother sauces | [`generics`](src/mothersauce/recipes/generics.py) | Write the container once and keep every type: PEP 695 syntax, bounds, defaults, ParamSpec, Result. |
-| Mother sauces | [`generators`](src/mothersauce/recipes/generators.py) | Any size of input in the memory of one record: streams, stages, batches, windows, send, cursors. |
-| Mother sauces | [`context-managers`](src/mothersauce/recipes/context_managers.py) | Every acquire paired with its release: timers, atomic writes, nested transactions, ExitStack. |
-| Mother sauces | [`decorators`](src/mothersauce/recipes/decorators.py) | Cross cutting behaviour written once: typed retry with backoff and jitter, caches, singledispatch. |
-| Mother sauces | [`oop`](src/mothersauce/recipes/oop.py) | Composition over inheritance, dunder protocols, properties, descriptors and __slots__. |
-| Mother sauces | [`data-structures`](src/mothersauce/recipes/data_structures.py) | The container that makes the code obvious: Counter, deque, heapq, bisect, ChainMap, graphlib. |
-| Mother sauces | [`errors`](src/mothersauce/recipes/errors.py) | A hierarchy you can catch, chains you can follow, and batches that report every failure at once. |
-| On the line | [`sql`](src/mothersauce/recipes/sql.py) | Injection proof queries with template strings, schema evolution, idempotent upserts and high watermarks. |
-| On the line | [`data-quality`](src/mothersauce/recipes/quality.py) | Rules as data, severities, quarantine, and overrides with an audit trail. |
-| On the line | [`pipeline`](src/mothersauce/recipes/pipeline.py) | Most recipes plated together: a small, real ETL with quality rules, upserts by key and JSON logs. |
-| Service | [`logging`](src/mothersauce/recipes/logs.py) | JSON lines with a run id from a ContextVar, secrets redacted, configured once with dictConfig. |
-| Service | [`config`](src/mothersauce/recipes/config.py) | One frozen settings object from defaults, TOML, environment and flags, with where each value came from. |
-| Service | [`concurrency`](src/mothersauce/recipes/concurrency.py) | Wait for many slow things at once, bounded, in order, without losing a single error. |
-| Service | [`performance`](src/mothersauce/recipes/performance.py) | Measure first, then make the common path cheap: lazy imports, timeit, import costs. |
-| Service | [`cli`](src/mothersauce/cli.py) | This package's own CLI: subcommands, --json wherever there is data, exit codes, a man page, lazy imports. |
-| Service | [`mcp-server`](src/mothersauce/mcp.py) | This package's own MCP server: JSON-RPC over stdio with tools, resources and prompts. |
-| The pass | [`testing`](src/mothersauce/data/practice/testing.md) | Fixtures, parametrize, fakes over mocks, doctests and a coverage gate: nothing broken leaves the pass. |
-| The pass | [`bdd`](src/mothersauce/data/practice/bdd.md) | Gherkin features run by pytest-bdd: behaviour written so a person can read it and pytest can run it. |
+| Mise en place | [`workflow`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/workflow.md) | pyenv and pyenv-virtualenv, make targets, and CI that runs exactly what your machine runs. |
+| Mise en place | [`layout`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/layout.md) | The src layout: one package, one concept per module, tests that mirror it, data shipped inside. |
+| Mise en place | [`style`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/style.md) | Ten checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more. |
+| Mother sauces | [`dataclasses`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/value_objects.py) | Small, honest value objects: frozen, slotted, validated, replaced rather than mutated. |
+| Mother sauces | [`pydantic`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/models.py) | Parse, don't validate, at the edges: frozen models that forbid extras, reusable constraints, unions. |
+| Mother sauces | [`enums`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/enums.py) | Closed sets of names: StrEnum, IntEnum, Flag, a state machine, and exhaustive match with assert_never. |
+| Mother sauces | [`abstractions`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/abstractions.py) | ABCs for families you own, with a template method; Protocols for shapes you accept. |
+| Mother sauces | [`factories`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/factories.py) | Decide which class to build in one place: registries, __init_subclass__, from_ constructors, plugins. |
+| Mother sauces | [`generics`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/generics.py) | Write the container once and keep every type: PEP 695 syntax, bounds, defaults, ParamSpec, Result. |
+| Mother sauces | [`generators`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/generators.py) | Any size of input in the memory of one record: streams, stages, batches, windows, send, cursors. |
+| Mother sauces | [`context-managers`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/context_managers.py) | Every acquire paired with its release: timers, atomic writes, nested transactions, ExitStack. |
+| Mother sauces | [`decorators`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/decorators.py) | Cross cutting behaviour written once: typed retry with backoff and jitter, caches, singledispatch. |
+| Mother sauces | [`oop`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/oop.py) | Composition over inheritance, dunder protocols, properties, descriptors and __slots__. |
+| Mother sauces | [`data-structures`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/data_structures.py) | The container that makes the code obvious: Counter, deque, heapq, bisect, ChainMap, graphlib. |
+| Mother sauces | [`errors`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/errors.py) | A hierarchy you can catch, chains you can follow, and batches that report every failure at once. |
+| On the line | [`sql`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/sql.py) | Injection proof queries with template strings, schema evolution, idempotent upserts and high watermarks. |
+| On the line | [`data-quality`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/quality.py) | Rules as data, severities, quarantine, and overrides with an audit trail. |
+| On the line | [`pipeline`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/pipeline.py) | Most recipes plated together: a small, real ETL with quality rules, upserts by key and JSON logs. |
+| Service | [`logging`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/logs.py) | JSON lines with a run id from a ContextVar, secrets redacted, configured once with dictConfig. |
+| Service | [`config`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/config.py) | One frozen settings object from defaults, TOML, environment and flags, with where each value came from. |
+| Service | [`concurrency`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/concurrency.py) | Wait for many slow things at once, bounded, in order, without losing a single error. |
+| Service | [`performance`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/performance.py) | Measure first, then make the common path cheap: lazy imports, timeit, import costs. |
+| Service | [`cli`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/cli.py) | This package's own CLI: subcommands, --json wherever there is data, exit codes, a man page, lazy imports. |
+| Service | [`mcp-server`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/mcp.py) | This package's own MCP server: JSON-RPC over stdio with tools, resources and prompts. |
+| The pass | [`testing`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/testing.md) | Fixtures, parametrize, fakes over mocks, doctests and a coverage gate: nothing broken leaves the pass. |
+| The pass | [`bdd`](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/bdd.md) | Gherkin features run by pytest-bdd: behaviour written so a person can read it and pytest can run it. |
 <!-- menu:end -->
 
-The full cards, with when to use each recipe and when not to, are in [docs/RECIPES.md](docs/RECIPES.md).
+The full cards, with when to use each recipe and when not to, are in [docs/RECIPES.md](https://github.com/jpsanders/mothersauce/blob/main/docs/RECIPES.md).
 
 ## Use it
 
@@ -110,12 +111,12 @@ mothersauce style                        # the house style
 mothersauce guide                        # the whole manual; or: mothersauce man --install && man mothersauce
 ```
 
-Every command that prints data takes `--json`. Install it with uv or pipx, or straight from a release:
+Every command that prints data takes `--json`. It is on PyPI and needs Python 3.15:
 
 ```sh
-uv tool install git+https://github.com/jpsanders/mothersauce          # uv fetches Python 3.15 if you lack it
-pipx install git+https://github.com/jpsanders/mothersauce
-pip install https://github.com/jpsanders/mothersauce/releases/download/1.0.0/mothersauce-1.0.0-py3-none-any.whl
+uv tool install mothersauce     # uv fetches Python 3.15 if you lack it
+pipx install mothersauce
+pip install mothersauce
 ```
 
 ## For AI agents
@@ -135,7 +136,7 @@ Codex are changed through their own command line; other configuration files get 
 exactly what a real run would do. Or add the server to any MCP client by hand, with nothing installed first:
 
 ```json
-{"mcpServers": {"mothersauce": {"command": "uvx", "args": ["--from", "git+https://github.com/jpsanders/mothersauce", "mothersauce", "mcp"]}}}
+{"mcpServers": {"mothersauce": {"command": "uvx", "args": ["mothersauce", "mcp"]}}}
 ```
 
 | Tool | What it returns |
@@ -151,7 +152,7 @@ own source.
 
 **Without a server:** `mothersauce skill` prints the skill, and `npx skills add jpsanders/mothersauce` installs it in
 the harnesses that tool knows. `mothersauce style --agents` prints a short block for a project's AGENTS.md or
-CLAUDE.md that tells any agent to write Python this way. [llms.txt](llms.txt) maps the repository for agents that read
+CLAUDE.md that tells any agent to write Python this way. [llms.txt](https://github.com/jpsanders/mothersauce/blob/main/llms.txt) maps the repository for agents that read
 it directly.
 
 ## Python 3.15, used for real
@@ -241,8 +242,8 @@ make demo        # run every recipe's demo
 ```
 
 A new recipe is a module in `src/mothersauce/recipes/` with a `demo()`, its tests in `tests/mothersauce/recipes/`,
-and an entry in `src/mothersauce/data/recipes.toml`. See [CONTRIBUTING.md](CONTRIBUTING.md) and
-[SECURITY.md](SECURITY.md).
+and an entry in `src/mothersauce/data/recipes.toml`. See [CONTRIBUTING.md](https://github.com/jpsanders/mothersauce/blob/main/CONTRIBUTING.md) and
+[SECURITY.md](https://github.com/jpsanders/mothersauce/blob/main/SECURITY.md).
 
 ## Star history
 

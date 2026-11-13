@@ -158,8 +158,7 @@ Add it to any MCP client by hand:
 or without installing anything first, through uv:
 
 ```
-{"mcpServers": {"mothersauce": {"command": "uvx",
-  "args": ["--from", "git+https://github.com/jpsanders/mothersauce", "mothersauce", "mcp"]}}}
+{"mcpServers": {"mothersauce": {"command": "uvx", "args": ["mothersauce", "mcp"]}}}
 ```
 
 ### The skill and the plugin

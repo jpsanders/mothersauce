@@ -30,12 +30,12 @@ LLMS = ROOT / "llms.txt"
 
 def _link(recipe: Recipe) -> str:
     """
-    Link a recipe's id to its source file in the repository.
+    Link a recipe's id to its source file on GitHub, absolute so the link also works on PyPI.
 
     :param recipe: The recipe
     :returns: A Markdown link
     """
-    return f"[`{recipe.id}`]({recipe.source_path})"
+    return f"[`{recipe.id}`]({REPO}/blob/main/{recipe.source_path})"
 
 
 def recipes_md() -> str:
@@ -103,7 +103,7 @@ def llms_txt() -> str:
         "> context managers, generics and more, each a typed, tested module with a runnable demo, plus the practices",
         "> around them. A CLI, a man page, an MCP server and an agent skill serve them to people and AI agents.",
         "",
-        "Install: `uv tool install git+https://github.com/jpsanders/mothersauce`. Then `mothersauce list`,",
+        "Install: `uv tool install mothersauce` or `pip install mothersauce`. Then `mothersauce list`,",
         '`mothersauce search "<problem>"`, `mothersauce show <recipe>`, `mothersauce run <recipe>`, or',
         "`mothersauce mcp` as an MCP server. `mothersauce guide` prints the full manual.",
         "",

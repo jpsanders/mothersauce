@@ -58,5 +58,5 @@ tests/features/                  Gherkin features, run by the tests/mothersauce/
 - Every command that prints data takes `--json`. Exit 0 on success, 1 on a failure, 2 on bad arguments.
 - Prose in docs and docstrings uses no dashes as punctuation.
 - Add an entry to CHANGELOG.md for anything a user would notice.
-- Tags carry the bare version, `1.2.0`, never `v1.2.0`; the release workflow checks the README badge, the plugin
-  files and `.mcp.json` name the same version.
+- Tags carry the bare version, `1.2.0`, never `v1.2.0`. The release workflow checks that the README badge, the
+  CHANGELOG, the plugin files and `.mcp.json` name the same version, then publishes to PyPI.

@@ -2,6 +2,13 @@
 
 Versions follow [semantic versioning](https://semver.org). Tags carry the bare version, such as `1.0.0`.
 
+## 1.0.1 (2026-11-13)
+
+- On PyPI: `pip install mothersauce`, `uv tool install mothersauce`, or `uvx mothersauce mcp` for an agent with nothing
+  installed first. Each GitHub release now publishes itself to PyPI through trusted publishing; no token is stored.
+- The README's images and links are absolute, so the page reads the same on PyPI as on GitHub.
+- The Claude Code plugin and `integrate` start the server from PyPI through uvx.
+
 ## 1.0.0 (2026-11-13)
 
 The first release.

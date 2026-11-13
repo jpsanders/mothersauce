@@ -49,8 +49,9 @@ git push origin 1.0.0
 gh release create 1.0.0 --title 1.0.0 --notes-file notes.md
 ```
 
-`release.yml` then checks that the README's release badge names the same version, builds the wheel and the sdist, and
-attaches them to the release. Release only when every CI job of the tagged commit is green.
+`release.yml` then checks that the README's release badge names the same version, builds the wheel and the sdist,
+attaches them to the release, and publishes them to PyPI through trusted publishing: PyPI trusts this workflow in this
+repository, so no token is stored anywhere. Release only when every CI job of the tagged commit is green.
 
 ## Main is protected
 

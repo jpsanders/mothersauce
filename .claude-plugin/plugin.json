@@ -1,7 +1,7 @@
 {
   "name": "mothersauce",
   "description": "The base recipes of production Python 3.15 for your agent: a skill that picks the right pattern and an MCP server that serves 26 recipes for production Python, 21 of them typed, tested modules.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "James Phillip Sanders",
     "email": "hello@jamesphillipsanders.com",

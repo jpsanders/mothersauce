@@ -26,7 +26,7 @@ from typing import Any
 __all__ = ["HARNESSES", "Step", "command", "run", "skill_text"]
 
 NAME = "mothersauce"
-UVX = ["uvx", "--from", "git+https://github.com/jpsanders/mothersauce", NAME, "mcp"]
+UVX = ["uvx", NAME, "mcp"]
 
 
 @dataclass(frozen=True, slots=True)

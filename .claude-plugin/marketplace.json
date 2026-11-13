@@ -10,7 +10,7 @@
     {
       "name": "mothersauce",
       "description": "A skill and an MCP server that give your agent 26 recipes for production Python, 21 of them typed, tested modules.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "./",
       "category": "development",
       "homepage": "https://github.com/jpsanders/mothersauce"
