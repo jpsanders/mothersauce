@@ -221,6 +221,8 @@ def cmd_man(args: argparse.Namespace) -> int:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(page, encoding="utf-8")
         print(f"installed {target}; read it with: man {PROG}")
+        if os.environ.get("XDG_DATA_HOME"):
+            print(f'man may not search there; if it says no entry, run: export MANPATH="{target.parent.parent}:"')
         return 0
     man = shutil.which("man")
     if man and sys.stdout.isatty() and not args.raw:
@@ -289,13 +291,17 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     try:
         check("pydantic", True, metadata.version("pydantic"))
     except metadata.PackageNotFoundError:
-        check("pydantic", False, f"missing: pip install --force-reinstall {PROG}")
+        check("pydantic", False, f"missing: {sys.executable} -m pip install 'pydantic>=2.14'")
     missing = [r.id for r in catalogue.recipes() if not (resources.files(PROG) / r.package_path).is_file()]
     check("recipes", not missing, f"{len(catalogue.recipes())} recipes" + (f", missing {missing}" if missing else ""))
     page = man_folder() / f"{PROG}.1"
     check("man page", page.is_file(), str(page) if page.is_file() else f"run: {PROG} man --install", required=False)
-    skill = Path.home() / ".claude" / "skills" / PROG / "SKILL.md"
-    check("agent skill", skill.is_file(), str(skill) if skill.is_file() else f"run: {PROG} integrate", required=False)
+    claude = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+    skill = claude / "skills" / PROG / "SKILL.md"
+    plugins = claude / "plugins" / "installed_plugins.json"
+    plugin = plugins.is_file() and f'"{PROG}@' in plugins.read_text(encoding="utf-8")
+    where = str(skill) if skill.is_file() else ("the Claude Code plugin" if plugin else f"run: {PROG} integrate")
+    check("agent skill", skill.is_file() or plugin, where, required=False)
     pyenv = shutil.which("pyenv")
     check("pyenv", bool(pyenv), pyenv or "not found; see the workflow recipe", required=False)
     if args.json:
@@ -305,6 +311,19 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             mark = "ok" if item["ok"] else ("!!" if item["required"] else "--")
             print(f"[{mark}] {item['check']:<12} {item['detail']}")
     return 0 if all(item["ok"] for item in checks if item["required"]) else 1
+
+
+def _positive(text: str) -> int:
+    """
+    Read a whole number of at least one, for argparse.
+
+    :param text: The argument
+    :returns: The number
+    :raises argparse.ArgumentTypeError: When it is not a whole number of at least one
+    """
+    if not text.isdigit() or int(text) < 1:
+        raise argparse.ArgumentTypeError(f"expected a whole number of at least 1, got {text!r}")
+    return int(text)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -338,7 +357,7 @@ def build_parser() -> argparse.ArgumentParser:
     add("run", cmd_run, "run a recipe's demo").add_argument("recipe", help="a code recipe's id")
     search = add("search", cmd_search, "find the recipes for a problem", json_flag=True)
     search.add_argument("query", nargs="+", help="the problem in a few words")
-    search.add_argument("--limit", type=int, default=5, metavar="N", help="at most N results (default 5)")
+    search.add_argument("--limit", type=_positive, default=5, metavar="N", help="at most N results (default 5)")
     style = add("style", cmd_style, "print the house style")
     style.add_argument("--agents", action="store_true", help="print a short block for AGENTS.md or CLAUDE.md")
     add("guide", cmd_guide, "print the full manual, for people and agents")

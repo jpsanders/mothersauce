@@ -110,3 +110,9 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert "prep in parallel waves: [['garnish', 'roux', 'stock'], ['veloute'], ['plate']]" in out
     assert "LRU kept ['a', 'c']" in out
+
+
+def test_price_band_with_custom_bands() -> None:
+    assert price_band(Decimal(5), bounds=(4,), names=("cheap", "dear")) == "dear"
+    with pytest.raises(ValueError, match="2 bounds make 3 bands, but 2 names"):
+        price_band(Decimal(5), bounds=(4, 8), names=("cheap", "dear"))

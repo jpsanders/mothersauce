@@ -23,8 +23,9 @@ scripts/             build_man.py, build_docs.py, bench_startup.py
 
 ## Rules
 
-- **The src layout.** The package lives under `src/`, so tests import the installed package, never the working
-  folder by accident. A file missing from the wheel then fails in CI instead of on a user's machine.
+- **The src layout.** The package lives under `src/`, so Python never imports it from the working folder by
+  accident: tests import the installed package, which in development is an editable install of `src/`. The CI job
+  that installs the built wheel is what catches a file missing from the package.
 - **One concept per module.** When a module needs a second sentence to say what it is for, it is two modules.
 - **`__all__` lists the public names.** Everything else is private, and a leading underscore says so.
 - **Absolute imports.** `from mothersauce.recipes import sql`, never `from . import sql`; flake8 enforces it.

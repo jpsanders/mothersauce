@@ -31,7 +31,7 @@ its own tests. A practice recipe is a short guide to the work around the code: t
 the tests. Every recipe has a card that says when to use it and when not to.
 
 The recipes share one example domain, a restaurant's ticket feed, so they read as one system: the pipeline recipe
-loads that feed using all the others. Copy the shape of a recipe, not its names.
+loads that feed using most of the others. Copy the shape of a recipe, not its names.
 
 The same recipes reach people and agents four ways: this command, this manual (`guide`, `man`), an MCP server
 (`mcp`) and an agent skill (`skill`, `integrate`). With no command, `mothersauce` prints the menu.
@@ -48,7 +48,7 @@ The same recipes reach people and agents four ways: this command, this manual (`
 | `guide` | Print this manual as Markdown. |
 | `man` | Show this manual as a man page. `--install` puts it where `man mothersauce` finds it; `--raw` prints roff. |
 | `mcp` | Serve the recipes to an AI agent over the Model Context Protocol, on standard input and output. |
-| `integrate` | Register the MCP server and install the skill in Claude Code, Codex, OpenCode, Gemini CLI and Cursor. |
+| `integrate` | Add the MCP server to Claude Code, Codex, OpenCode, Gemini CLI and Cursor, and the skill where read. |
 | `skill` | Print the agent skill. |
 | `doctor` | Check the install: Python, pydantic, the recipes; and report the man page, the skill and pyenv. |
 
@@ -82,14 +82,14 @@ The menu runs like a kitchen: prepare, cook the bases, work the line, run the se
 | --- | --- |
 | `workflow` | pyenv and pyenv-virtualenv, make targets, and CI that runs exactly what your machine runs. |
 | `layout` | The src layout: one package, one concept per module, tests that mirror it, data shipped inside. |
-| `style` | Nine checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more. |
+| `style` | Ten checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more. |
 
 ### Mother sauces
 
 | Recipe | What it gives you |
 | --- | --- |
 | `dataclasses` | Small, honest value objects: frozen, slotted, validated, replaced rather than mutated. |
-| `pydantic` | Parse, don't validate, at the edges: strict models, reusable constraints, discriminated unions. |
+| `pydantic` | Parse, don't validate, at the edges: frozen models that forbid extras, reusable constraints, unions. |
 | `enums` | Closed sets of names: StrEnum, IntEnum, Flag, a state machine, and exhaustive match with assert_never. |
 | `abstractions` | ABCs for families you own, with a template method; Protocols for shapes you accept. |
 | `factories` | Decide which class to build in one place: registries, __init_subclass__, from_ constructors, plugins. |
@@ -105,9 +105,9 @@ The menu runs like a kitchen: prepare, cook the bases, work the line, run the se
 
 | Recipe | What it gives you |
 | --- | --- |
-| `sql` | Injection proof queries with t-strings, schema evolution, idempotent upserts and high watermarks. |
+| `sql` | Injection proof queries with template strings, schema evolution, idempotent upserts and high watermarks. |
 | `data-quality` | Rules as data, severities, quarantine, and overrides with an audit trail. |
-| `pipeline` | Every recipe plated together: a small, real ETL with quality rules, upserts, watermarks and JSON logs. |
+| `pipeline` | Most recipes plated together: a small, real ETL with quality rules, upserts by key and JSON logs. |
 
 ### Service
 
@@ -117,7 +117,7 @@ The menu runs like a kitchen: prepare, cook the bases, work the line, run the se
 | `config` | One frozen settings object from defaults, TOML, environment and flags, with where each value came from. |
 | `concurrency` | Wait for many slow things at once, bounded, in order, without losing a single error. |
 | `performance` | Measure first, then make the common path cheap: lazy imports, timeit, import costs. |
-| `cli` | This package's own CLI: subcommands, --json on everything, real exit codes, a man page, lazy imports. |
+| `cli` | This package's own CLI: subcommands, --json wherever there is data, exit codes, a man page, lazy imports. |
 | `mcp-server` | This package's own MCP server: JSON-RPC over stdio with tools, resources and prompts. |
 
 ### The pass
@@ -164,9 +164,12 @@ or without installing anything first, through uv:
 
 ### The skill and the plugin
 
-`mothersauce integrate` finds the harnesses installed for the current user and, for each, registers the server and
-installs the skill, using the harness's own command line when it has one. The repository is also a Claude Code
-plugin, with the skill and the server in one step:
+`mothersauce integrate` finds the harnesses installed for the current user and registers the server in each. It
+installs the skill in the three that read skills folders: Claude Code, Codex and OpenCode. Claude Code and Codex are
+changed through `claude mcp add` and `codex mcp add`; when the `claude` command is missing, the line to run is printed
+instead, because Claude Code's own configuration file is never edited from outside. The other configuration files
+are edited after a backup, and one that does not parse is left alone. `--dry-run` reports exactly what a real run
+would do. The repository is also a Claude Code plugin, with the skill and the server in one step:
 
 ```
 /plugin install mothersauce --marketplace jpsanders/mothersauce
@@ -196,8 +199,9 @@ make init-dev
 make checks
 ```
 
-`make checks` runs isort, black, editorconfig-checker, darglint, flake8, mypy in strict mode, bandit, the docs and
-man page freshness checks, and pytest with doctests, pytest-bdd scenarios and a coverage floor of 95%. `make docs`
+`make checks` runs editorconfig-checker, black, isort, bandit, flake8, darglint, mypy in strict mode, the docs and
+man page freshness checks, and pytest with doctests, pytest-bdd scenarios and a coverage floor of 95%, in the order
+CI runs them. `make docs`
 and `make man` rebuild the generated documents, `make bench` times the start up, and `make demo` runs every demo. The
 `workflow` recipe has the details: `mothersauce show workflow`.
 
@@ -224,8 +228,9 @@ best first. `doctor --json` prints an array of checks with `check`, `ok`, `requi
 
 ## FILES
 
-`~/.local/share/man/man1/mothersauce.1` is the installed man page. `integrate` writes `skills/mothersauce/SKILL.md`
-in each harness's folder and leaves a backup named `*.mothersauce.bak` next to any configuration file it edits.
+`~/.local/share/man/man1/mothersauce.1` is the installed man page. `integrate` writes `SKILL.md` to
+`skills/mothersauce/` for Claude Code and Codex and to `skill/mothersauce/` for OpenCode, and leaves a backup named
+`*.mothersauce.bak` next to any configuration file it edits.
 
 ## EXAMPLES
 

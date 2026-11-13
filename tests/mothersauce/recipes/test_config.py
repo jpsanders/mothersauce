@@ -70,3 +70,10 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert "batch_size 250 from the command line" in out
     assert "database.pool_size 8 from the environment" in out
+
+
+def test_a_value_and_a_section_at_one_place_is_refused() -> None:
+    with pytest.raises(ValueError, match="KITCHEN_DATABASE__URL"):
+        from_env({"KITCHEN_DATABASE": "x", "KITCHEN_DATABASE__URL": "y"})
+    with pytest.raises(ValueError, match="already define a section"):
+        from_env({"KITCHEN_DATABASE__URL": "y", "KITCHEN_DATABASE": "x"})

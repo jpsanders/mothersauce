@@ -24,7 +24,7 @@ Every cuisine rests on a handful of mother sauces; learn them and every other sa
 .PP
 A code recipe is one small module of Python 3.15 with full type hints, Sphinx docstrings, a \fBdemo()\fR you can run, and its own tests. A practice recipe is a short guide to the work around the code: the workflow, the layout, the style, the tests. Every recipe has a card that says when to use it and when not to.
 .PP
-The recipes share one example domain, a restaurant's ticket feed, so they read as one system: the pipeline recipe loads that feed using all the others. Copy the shape of a recipe, not its names.
+The recipes share one example domain, a restaurant's ticket feed, so they read as one system: the pipeline recipe loads that feed using most of the others. Copy the shape of a recipe, not its names.
 .PP
 The same recipes reach people and agents four ways: this command, this manual (\fBguide\fR, \fBman\fR), an MCP server (\fBmcp\fR) and an agent skill (\fBskill\fR, \fBintegrate\fR). With no command, \fBmothersauce\fR prints the menu.
 .SH COMMANDS
@@ -54,7 +54,7 @@ Show this manual as a man page. \fB\-\-install\fR puts it where \fBman mothersau
 Serve the recipes to an AI agent over the Model Context Protocol, on standard input and output.
 .TP
 \fBintegrate\fR
-Register the MCP server and install the skill in Claude Code, Codex, OpenCode, Gemini CLI and Cursor.
+Add the MCP server to Claude Code, Codex, OpenCode, Gemini CLI and Cursor, and the skill where read.
 .TP
 \fBskill\fR
 Print the agent skill.
@@ -109,14 +109,14 @@ pyenv and pyenv-virtualenv, make targets, and CI that runs exactly what your mac
 The src layout: one package, one concept per module, tests that mirror it, data shipped inside.
 .TP
 \fBstyle\fR
-Nine checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more.
+Ten checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more.
 .SS Mother sauces
 .TP
 \fBdataclasses\fR
 Small, honest value objects: frozen, slotted, validated, replaced rather than mutated.
 .TP
 \fBpydantic\fR
-Parse, don't validate, at the edges: strict models, reusable constraints, discriminated unions.
+Parse, don't validate, at the edges: frozen models that forbid extras, reusable constraints, unions.
 .TP
 \fBenums\fR
 Closed sets of names: StrEnum, IntEnum, Flag, a state machine, and exhaustive match with assert_never.
@@ -150,13 +150,13 @@ A hierarchy you can catch, chains you can follow, and batches that report every 
 .SS On the line
 .TP
 \fBsql\fR
-Injection proof queries with t-strings, schema evolution, idempotent upserts and high watermarks.
+Injection proof queries with template strings, schema evolution, idempotent upserts and high watermarks.
 .TP
 \fBdata\-quality\fR
 Rules as data, severities, quarantine, and overrides with an audit trail.
 .TP
 \fBpipeline\fR
-Every recipe plated together: a small, real ETL with quality rules, upserts, watermarks and JSON logs.
+Most recipes plated together: a small, real ETL with quality rules, upserts by key and JSON logs.
 .SS Service
 .TP
 \fBlogging\fR
@@ -172,7 +172,7 @@ Wait for many slow things at once, bounded, in order, without losing a single er
 Measure first, then make the common path cheap: lazy imports, timeit, import costs.
 .TP
 \fBcli\fR
-This package's own CLI: subcommands, --json on everything, real exit codes, a man page, lazy imports.
+This package's own CLI: subcommands, --json wherever there is data, exit codes, a man page, lazy imports.
 .TP
 \fBmcp\-server\fR
 This package's own MCP server: JSON-RPC over stdio with tools, resources and prompts.
@@ -220,7 +220,7 @@ or without installing anything first, through uv:
 .RE
 .SS The skill and the plugin
 .PP
-\fBmothersauce integrate\fR finds the harnesses installed for the current user and, for each, registers the server and installs the skill, using the harness's own command line when it has one. The repository is also a Claude Code plugin, with the skill and the server in one step:
+\fBmothersauce integrate\fR finds the harnesses installed for the current user and registers the server in each. It installs the skill in the three that read skills folders: Claude Code, Codex and OpenCode. Claude Code and Codex are changed through \fBclaude mcp add\fR and \fBcodex mcp add\fR; when the \fBclaude\fR command is missing, the line to run is printed instead, because Claude Code's own configuration file is never edited from outside. The other configuration files are edited after a backup, and one that does not parse is left alone. \fB\-\-dry\-run\fR reports exactly what a real run would do. The repository is also a Claude Code plugin, with the skill and the server in one step:
 .RS 4
 .nf
 /plugin install mothersauce \-\-marketplace jpsanders/mothersauce
@@ -246,7 +246,7 @@ make checks
 .fi
 .RE
 .PP
-\fBmake checks\fR runs isort, black, editorconfig-checker, darglint, flake8, mypy in strict mode, bandit, the docs and man page freshness checks, and pytest with doctests, pytest-bdd scenarios and a coverage floor of 95%. \fBmake docs\fR and \fBmake man\fR rebuild the generated documents, \fBmake bench\fR times the start up, and \fBmake demo\fR runs every demo. The \fBworkflow\fR recipe has the details: \fBmothersauce show workflow\fR.
+\fBmake checks\fR runs editorconfig-checker, black, isort, bandit, flake8, darglint, mypy in strict mode, the docs and man page freshness checks, and pytest with doctests, pytest-bdd scenarios and a coverage floor of 95%, in the order CI runs them. \fBmake docs\fR and \fBmake man\fR rebuild the generated documents, \fBmake bench\fR times the start up, and \fBmake demo\fR runs every demo. The \fBworkflow\fR recipe has the details: \fBmothersauce show workflow\fR.
 .SH JSON OUTPUT
 .PP
 \fBlist \-\-json\fR prints an array of recipe cards with the fields \fBid\fR, \fBsection\fR, \fBtitle\fR, \fBkind\fR, \fBsummary\fR, \fBtags\fR, \fBpython\fR, \fBuse_when\fR, \fBavoid_when\fR, \fBrelated\fR, \fBsource_path\fR, \fBtests_path\fR and \fBrun\fR. \fBshow \-\-json\fR prints one card with \fBnotes\fR and \fBsource\fR added. \fBsearch \-\-json\fR prints an array of objects with \fBid\fR, \fBtitle\fR, \fBsummary\fR and \fBscore\fR, best first. \fBdoctor \-\-json\fR prints an array of checks with \fBcheck\fR, \fBok\fR, \fBrequired\fR and \fBdetail\fR.
@@ -268,7 +268,7 @@ The Codex folder \fBintegrate\fR uses. Default: \fB~/.codex\fR.
 Where \fBintegrate\fR looks for OpenCode. Default: \fB~/.config\fR.
 .SH FILES
 .PP
-\fB~/.local/share/man/man1/mothersauce.1\fR is the installed man page. \fBintegrate\fR writes \fBskills/mothersauce/SKILL.md\fR in each harness's folder and leaves a backup named \fB*.mothersauce.bak\fR next to any configuration file it edits.
+\fB~/.local/share/man/man1/mothersauce.1\fR is the installed man page. \fBintegrate\fR writes \fBSKILL.md\fR to \fBskills/mothersauce/\fR for Claude Code and Codex and to \fBskill/mothersauce/\fR for OpenCode, and leaves a backup named \fB*.mothersauce.bak\fR next to any configuration file it edits.
 .SH EXAMPLES
 .PP
 Find and read the recipe for a problem:

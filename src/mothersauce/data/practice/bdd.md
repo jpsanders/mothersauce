@@ -27,26 +27,32 @@ the language of the code: no table names, no function names.
 scenarios("pipeline.feature")
 
 
-@given("the sample ticket feed", target_fixture="feed")
-def sample_feed() -> str:
-    return sample_path().as_uri().replace("file:", "csv:", 1)
+@given("the staff meal is approved by the head chef", target_fixture="overrides")
+def staff_meal_approved() -> list[Override]:
+    return [Override("T-1005-1", "price_not_zero", "head chef", "family meal before service")]
 
 
-@then(parsers.parse("{count:d} lines are loaded"))
+@when("the pipeline runs", target_fixture="summary")
+def pipeline_runs(feed: str, database: sqlite3.Connection, overrides: list[Override]) -> Summary:
+    return run(feed, database, overrides=overrides)
+
+
+@then(parsers.re(r"(?P<count>\d+) lines? (?:is|are) loaded"), converters={"count": int})
 def lines_loaded(summary: Summary, count: int) -> None:
     assert summary.loaded == count
 ```
 
 `scenarios()` turns every scenario in the file into a test. `target_fixture` makes a step's return value a fixture
-that later steps ask for by name, which is how state flows from Given to When to Then. `parsers.parse` reads values
-out of the sentence, so one step serves every number.
+that later steps ask for by name, which is how state flows from Given to When to Then; an ordinary fixture of the same
+name gives the default when no Given step sets it. `parsers.parse` and `parsers.re` read values out of the sentence,
+so one step serves every number, singular or plural. These are the steps in `tests/mothersauce/test_bdd_pipeline.py`.
 
 ## Scenario outlines
 
 ```gherkin
-  Scenario Outline: Searching finds the right recipe
-    When I search for "<question>"
-    Then the first result is <recipe>
+  Scenario Outline: Searching finds the right recipe first
+    When I run mothersauce search "<question>"
+    Then the first recipe is <recipe>
 
     Examples:
       | question                 | recipe           |

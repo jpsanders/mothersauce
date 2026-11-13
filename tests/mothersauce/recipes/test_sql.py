@@ -69,7 +69,7 @@ def test_bad_specs_are_refused(query: Template) -> None:
         (True, "INTEGER"),
         (3, "INTEGER"),
         (1.5, "REAL"),
-        (Decimal("1.10"), "NUMERIC"),
+        (Decimal("1.10"), "TEXT"),
         (b"\x00", "BLOB"),
         ("x", "TEXT"),
         (None, "TEXT"),
@@ -98,7 +98,18 @@ def test_upsert_is_idempotent_and_updates(conn: sqlite3.Connection) -> None:
 def test_upsert_adapts_decimal_and_dates(conn: sqlite3.Connection) -> None:
     when = datetime(2026, 11, 12, 19, 30, tzinfo=UTC)
     upsert(conn, "t", [{"id": "a", "price": Decimal("31.50"), "at": when}], key="id")
-    assert conn.execute("SELECT price, at FROM t").fetchone() == (31.5, "2026-11-12T19:30:00+00:00")
+    assert conn.execute("SELECT price, at FROM t").fetchone() == ("31.50", "2026-11-12T19:30:00+00:00")
+
+
+def test_money_reads_back_with_its_cents(conn: sqlite3.Connection) -> None:
+    upsert(conn, "t", [{"id": "a", "price": Decimal("9.00")}, {"id": "b", "price": Decimal("0.10")}], key="id")
+    prices = [Decimal(row[0]) for row in conn.execute("SELECT price FROM t ORDER BY id")]
+    assert prices == [Decimal("9.00"), Decimal("0.10")] and str(prices[0]) == "9.00"
+
+
+def test_rows_with_only_a_key_do_nothing_on_conflict(conn: sqlite3.Connection) -> None:
+    assert upsert(conn, "t", [{"id": "a"}, {"id": "a"}], key="id") == 2
+    assert [row[0] for row in conn.execute("SELECT id FROM t")] == ["a"]
 
 
 def test_upsert_batches_and_new_fields(conn: sqlite3.Connection) -> None:
@@ -123,13 +134,23 @@ def test_unsafe_field_names_fail_before_the_database_is_touched(conn: sqlite3.Co
 
 def test_extract_since_moves_the_watermark(conn: sqlite3.Connection) -> None:
     upsert(conn, "t", [{"id": "a", "at": "01"}, {"id": "b", "at": "03"}, {"id": "c", "at": "02"}], key="id")
-    rows, mark = extract_since(conn, "t", "at", "01")
-    assert [r["id"] for r in rows] == ["c", "b"] and mark == "03"
-    assert extract_since(conn, "t", "at", mark) == ([], "03")
+    rows, mark = extract_since(conn, "t", "at", "id", ("01", "a"))
+    assert [r["id"] for r in rows] == ["c", "b"] and mark == ("03", "b")
+    assert extract_since(conn, "t", "at", "id", mark) == ([], ("03", "b"))
+    assert len(extract_since(conn, "t", "at", "id", None)[0]) == 3
+
+
+def test_a_row_that_ties_the_watermark_is_still_found(conn: sqlite3.Connection) -> None:
+    upsert(conn, "t", [{"id": "a", "at": "05"}], key="id")
+    _, mark = extract_since(conn, "t", "at", "id", None)
+    upsert(conn, "t", [{"id": "b", "at": "05"}], key="id")  # arrives later, same timestamp
+    rows, _ = extract_since(conn, "t", "at", "id", mark)
+    assert [r["id"] for r in rows] == ["b"]
 
 
 def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     demo()
     out = capsys.readouterr().out
     assert "loaded lunch twice, rows in table: 2" in out
-    assert "next watermark 2026-11-12T19:40" in out
+    assert "next watermark ('2026-11-12T19:40', 'T-1002')" in out
+    assert "money kept its cents: '31.50'" in out

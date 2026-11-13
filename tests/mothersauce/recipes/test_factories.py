@@ -137,3 +137,17 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert "make_source chose CsvTicketSource" in out
     assert "| T-1001 | Steak Frites |" in out
+
+
+def test_source_spec_decodes_spaces_and_accents(tmp_path: Path) -> None:
+    folder = tmp_path / "menu du jour é"
+    folder.mkdir()
+    path = folder / "t.csv"
+    path.write_text("a\n1\n", encoding="utf-8")
+    source = make_source(path.as_uri().replace("file:", "csv:", 1))
+    assert list(source.read()) == [{"a": "1"}]
+
+
+def test_markdown_cells_escape_pipes_and_newlines() -> None:
+    table = MarkdownExporter().render([{"dish": "fish | chips", "note": "two\nlines"}])
+    assert table.splitlines()[2] == "| fish \\| chips | two lines |"

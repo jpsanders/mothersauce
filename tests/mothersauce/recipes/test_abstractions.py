@@ -86,10 +86,16 @@ def test_copy_rows_batches_into_any_sink() -> None:
     assert sink.batches == [2, 2, 1]
 
 
-def test_copy_rows_closes_closeable_sinks() -> None:
+def test_copy_rows_leaves_closing_to_the_owner() -> None:
     sink = ListSink()
     copy_rows(TrackingSource([{"a": "1"}]), sink)
-    assert sink.closed and sink.rows == [{"a": "1"}]
+    assert not sink.closed and sink.rows == [{"a": "1"}]
+
+
+def test_cells_of_spaces_count_as_empty() -> None:
+    source = TrackingSource([{"a": "  ", "b": " x "}, {"a": " ", "b": ""}])
+    assert list(source.read()) == [{"b": "x"}]
+    assert source.rows_read == 1
 
 
 def test_runtime_checkable_protocol_checks_method_names() -> None:

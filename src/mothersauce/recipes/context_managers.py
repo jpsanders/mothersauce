@@ -16,6 +16,7 @@ the exception. ``__exit__`` returning True swallows the exception, so return Fal
 
 import os
 import sqlite3
+import stat
 import tempfile
 import time
 from collections.abc import Generator, Sequence
@@ -66,8 +67,8 @@ def atomic_write(path: Path, encoding: str = "utf-8") -> Generator[TextIO]:
     Write a file so readers see the old version or the new one, never half of either.
 
     The text goes to a temporary file in the same folder, is flushed to disk, and then replaces the target in one
-    ``os.replace``, which is atomic on Linux, macOS and Windows. On an error the temporary file is removed and the
-    target is untouched.
+    ``os.replace``, which POSIX guarantees is atomic. On an error the temporary file is removed and the target is
+    untouched. The new file keeps the old one's permissions, because a temporary file starts as private (0600).
 
     :param path: The file to write
     :param encoding: Text encoding
@@ -81,6 +82,12 @@ def atomic_write(path: Path, encoding: str = "utf-8") -> Generator[TextIO]:
             yield handle
             handle.flush()
             os.fsync(handle.fileno())
+        if path.exists():
+            os.chmod(temp, stat.S_IMODE(path.stat().st_mode))
+        else:
+            umask = os.umask(0)
+            os.umask(umask)
+            os.chmod(temp, 0o666 & ~umask)
         os.replace(temp, path)
         replaced = True
     finally:

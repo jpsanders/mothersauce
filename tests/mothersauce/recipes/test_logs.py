@@ -97,3 +97,30 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert '"msg": "connecting with password=*** to the till"' in out
     assert "+ a traceback in 'exc'" in out
+
+
+@pytest.mark.parametrize(
+    ("message", "expected"),
+    [
+        ("connect db_password=hunter2", "connect db_password=***"),
+        ("oauth access_token=abc client_secret=s3", "oauth access_token=*** client_secret=***"),
+        ('body {"password": "hunter2"}', 'body {"password": "***"}'),
+        ("pwd:'q1', next", "pwd:'***', next"),
+    ],
+)
+def test_redaction_finds_secret_keys_anywhere(message: str, expected: str) -> None:
+    assert RedactSecrets.scrub(message) == expected
+
+
+def test_secret_extra_fields_and_tracebacks_are_masked(stream: io.StringIO) -> None:
+    log = logging.getLogger(NAME)
+    log.warning("connect", extra={"db_password": "hunter2", "rows": 3})
+    try:
+        raise ValueError("login failed for password=hunter2")
+    except ValueError:
+        log.exception("boom")
+    out = stream.getvalue()
+    assert "hunter2" not in out
+    first, second = events(stream)
+    assert first["db_password"] == "***" and first["rows"] == 3
+    assert "password=***" in second["exc"]

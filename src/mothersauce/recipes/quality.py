@@ -161,7 +161,8 @@ class Report:
 
         :returns: Rule names with counts, most frequent first
         """
-        return Counter(f.rule for f in self.findings if f.waived_by is None)
+        counts = Counter(f.rule for f in self.findings if f.waived_by is None)
+        return Counter(dict(counts.most_common()))
 
     def waived(self) -> list[Finding]:
         """
@@ -176,6 +177,8 @@ def _passes(check: Callable[[Record], bool], record: Record) -> bool:
     try:
         return check(record)
     except KeyError, ValueError, TypeError, InvalidOperation:
+        return False  # the usual ways a value is missing or malformed
+    except Exception:  # a bug in a rule fails the check; it must not stop the run for every other record
         return False
 
 

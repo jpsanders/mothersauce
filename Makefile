@@ -136,7 +136,7 @@ build: clean
 build-docker:
 	@echo
 	@echo --- Docker build image ---
-	docker build -t ${DOCKER_IMAGE} --no-cache .
+	docker build -t ${DOCKER_IMAGE} --no-cache --build-arg VERSION=$$(python -m setuptools_scm) .
 
 .PHONY: clean
 clean:
@@ -146,4 +146,4 @@ clean:
 
 # Run all checking tools
 .PHONY: checks
-checks: isort-check black-check ec docstyle lint mypy bandit docs-check man-check pytest
+checks: ec black-check isort-check bandit lint docstyle mypy docs-check man-check pytest

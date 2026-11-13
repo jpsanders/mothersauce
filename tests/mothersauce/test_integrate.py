@@ -44,9 +44,11 @@ def test_dry_run_changes_nothing(home: Path) -> None:
 
 def test_every_harness_gets_the_server_and_the_skill(home: Path) -> None:
     steps = run(["all"], home=home)
-    assert all(s.done for s in steps), [s.line() for s in steps if not s.done]
-    claude = json.loads((home / ".claude.json").read_text(encoding="utf-8"))["mcpServers"]["mothersauce"]
-    assert claude["args"][-1] == "mcp" and claude["type"] == "stdio"
+    claude_mcp = next(s for s in steps if (s.harness, s.what) == ("claude", "mcp"))
+    assert not claude_mcp.done and claude_mcp.target.startswith("claude mcp add --scope user mothersauce -- ")
+    assert not (home / ".claude.json").exists()  # Claude Code's live state is never edited from outside
+    others = [s for s in steps if s is not claude_mcp]
+    assert all(s.done for s in others), [s.line() for s in others if not s.done]
     assert tomllib.loads((home / ".codex/config.toml").read_text(encoding="utf-8"))["mcp_servers"]["mothersauce"]
     assert json.loads((home / ".config/opencode/opencode.json").read_text(encoding="utf-8"))["mcp"]["mothersauce"]
     assert json.loads((home / ".gemini/settings.json").read_text(encoding="utf-8"))["mcpServers"]["mothersauce"]
@@ -121,3 +123,39 @@ def test_unknown_harness_and_missing_harnesses(tmp_path: Path, monkeypatch: pyte
 def test_step_line() -> None:
     assert Step("cursor", "mcp", "/x/mcp.json", True).line() == "[ok] cursor   mcp   /x/mcp.json"
     assert Step("gemini", "mcp", "/y", False, "why").line().endswith("(why)")
+
+
+def test_dry_run_reports_the_commands_a_real_run_would_use(home: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[list[str]] = []
+    monkeypatch.setattr(shutil, "which", lambda name: f"/bin/{name}" if name in ("claude", "codex") else None)
+
+    def fake_run(args: list[str], env: dict[str, str] | None = None) -> tuple[int, str]:
+        calls.append(args)
+        return 0, ""
+
+    monkeypatch.setattr(integrate, "_run", fake_run)
+    steps = {(s.harness, s.what): s for s in run(["claude", "codex"], dry=True, home=home)}
+    assert steps[("claude", "mcp")].note == "would run" and steps[("codex", "mcp")].note == "would run"
+    assert steps[("codex", "mcp")].target.startswith("codex mcp add mothersauce -- ")
+    assert calls == []
+
+
+def test_codex_config_is_backed_up_before_the_append(home: Path) -> None:
+    config = home / ".codex" / "config.toml"
+    config.write_text('model = "o4"\n', encoding="utf-8")
+    run(["codex"], home=home)
+    assert config.with_name("config.toml.mothersauce.bak").read_text(encoding="utf-8") == 'model = "o4"\n'
+    assert "[mcp_servers.mothersauce]" in config.read_text(encoding="utf-8")
+
+
+def test_a_broken_codex_config_is_left_alone(home: Path) -> None:
+    config = home / ".codex" / "config.toml"
+    config.write_text("model = [", encoding="utf-8")
+    (step,) = run(["codex"], home=home)
+    assert not step.done and "does not parse" in step.note
+    assert config.read_text(encoding="utf-8") == "model = ["
+
+
+def test_a_throwaway_uvx_copy_registers_uvx_itself(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(shutil, "which", lambda name: "/home/u/.cache/uv/archive-v0/abc/bin/mothersauce")
+    assert command() == ["uvx", "--from", "git+https://github.com/jpsanders/mothersauce", "mothersauce", "mcp"]

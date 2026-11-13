@@ -164,7 +164,7 @@ class Recipe:
 
     def search_text(self) -> dict[str, str]:
         """
-        Collect the text each search weight applies to, lower cased.
+        Collect the text each search weight applies to.
 
         :returns: Field name to text
         """
@@ -224,8 +224,10 @@ def get(name: str) -> Recipe:
     :raises CatalogueError: With the closest ids, when nothing matches
     """
     wanted = _normalise(name)
+    if not wanted.strip("-"):
+        raise CatalogueError("a recipe id is required; see mothersauce list")
     for recipe in recipes():
-        module_name = (recipe.module or "").rsplit(".", 1)[-1].replace("_", "-")
+        module_name = recipe.module.rsplit(".", 1)[-1].replace("_", "-") if recipe.module else None
         if wanted in (recipe.id, module_name, _normalise(recipe.title)):
             return recipe
     ids = [recipe.id for recipe in recipes()]
@@ -243,9 +245,12 @@ def search(query: str, limit: int = 5) -> list[tuple[Recipe, int]]:
     Rank recipes for a question such as "retry a flaky api call". Matches in ids and titles weigh most.
 
     :param query: Words describing the problem
-    :param limit: The most results to return
+    :param limit: The most results to return, at least one
     :returns: Recipes with their scores, best first; empty when nothing matches
+    :raises ValueError: When the limit is below one
     """
+    if limit < 1:
+        raise ValueError("limit must be at least 1")
     tokens = [t for t in _words(query) if t not in _STOPWORDS and len(t) > 1]
     scored = []
     for recipe in recipes():

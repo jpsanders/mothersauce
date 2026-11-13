@@ -14,7 +14,8 @@ python -V                             # Python 3.15.2
 ```
 
 Activation on `cd` needs `eval "$(pyenv virtualenv-init -)"` in your shell's start up file. `.python-version` belongs
-to you, not to the repository: list it in your global ignore file, `~/.gitignore`. Without pyenv,
+to you, not to the repository: list it in your global ignore file, the one `git config --global core.excludesFile`
+names (by default `~/.config/git/ignore`). Without pyenv,
 `python3.15 -m venv .venv && . .venv/bin/activate` does the same job, and so does `uv venv --python 3.15`.
 
 ## The pass: make checks

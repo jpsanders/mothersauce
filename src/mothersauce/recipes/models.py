@@ -52,7 +52,7 @@ __all__ = [
 ]
 
 # Reusable constraints: one definition, every model that needs a ticket id or a quantity gets the same rules.
-TicketId = Annotated[str, StringConstraints(strip_whitespace=True, pattern=r"^T-\d{4,}$")]
+TicketId = Annotated[str, StringConstraints(strip_whitespace=True, pattern=r"^T-[0-9]{4,}$")]  # [0-9], not \d
 Quantity = Annotated[int, Field(ge=1, le=50)]
 Price = Annotated[Decimal, Field(ge=0, max_digits=8, decimal_places=2)]
 Station = Literal["grill", "fry", "sauce", "pastry", "cold"]
@@ -180,7 +180,9 @@ _EVENTS: TypeAdapter[list[Event]] = TypeAdapter(list[Event])
 
 def parse_events(raw: str | bytes) -> list[Event]:
     """
-    Validate a JSON array of events in one call. Pydantic parses the JSON itself, which is faster than json.loads.
+    Validate a JSON array of events in one call.
+
+    Pydantic parses the JSON itself, faster than ``json.loads`` followed by ``validate_python``.
 
     :param raw: The JSON text
     :returns: Typed events, each one the right model for its ``kind``
@@ -193,7 +195,7 @@ def explain(error: ValidationError) -> list[str]:
     Turn a validation error into one readable line per problem, with the path to the bad field.
 
     :param error: What pydantic raised
-    :returns: Lines such as ``0.ticket.lines.0.quantity: Input should be greater than or equal to 1``
+    :returns: Lines such as ``0.opened.ticket.lines.0.quantity: Input should be greater than or equal to 1``
     """
     return [".".join(str(part) for part in item["loc"]) + f": {item['msg']}" for item in error.errors()]
 

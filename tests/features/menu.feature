@@ -28,4 +28,4 @@ Feature: Finding a recipe from the command line
   Scenario: Tasting the pipeline runs it twice
     When I run mothersauce run pipeline
     Then the exit status is 0
-    And the output contains "run-2: read 16, loaded 0, skipped 12"
+    And the output contains "run-2: read 16, loaded 0, already loaded 12"

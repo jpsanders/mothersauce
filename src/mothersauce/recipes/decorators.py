@@ -7,7 +7,7 @@ function instead.
 
 Rules that keep decorators safe in production:
 
-- ``functools.wraps`` copies the name, docstring and signature, so logs, tracebacks and ``help()`` stay truthful.
+- ``functools.wraps`` copies the name, docstring and signature, so logs, ``help()`` and ``inspect`` stay truthful.
 - ``[**P, R]`` keeps the wrapped signature for mypy, so callers are still checked against the real parameters.
 - A decorator that takes arguments is a function that returns a decorator. Keep that layering easy to see.
 - Retry only what is safe to repeat, only for errors that can pass, with exponential backoff, jitter and a limit.
@@ -17,7 +17,6 @@ computed once per object, and ``singledispatch`` to pick an implementation by th
 ``warnings.deprecated`` marks old functions so that both mypy and the runtime warn their callers.
 """
 
-import dataclasses
 import logging
 import random
 import time
@@ -87,7 +86,8 @@ def retry[**P, R](
     """
     Retry a call that fails with a transient error, waiting longer each time.
 
-    The wait before retry ``n`` is a random time between zero and ``base_delay * 2 ** n``, capped at ``max_delay``:
+    The wait before retry ``n`` is a random time between zero and ``base_delay * 2 ** (n - 1)``, capped at
+    ``max_delay``:
     exponential backoff with full jitter, so a hundred workers that failed together do not retry together.
 
     :param attempts: Total tries, the first included
@@ -113,7 +113,7 @@ def retry[**P, R](
                     if attempt == attempts:
                         error.add_note(f"gave up after {attempts} attempts")
                         raise
-                    delay = jitter.uniform(0, min(max_delay, base_delay * 2**attempt))
+                    delay = jitter.uniform(0, min(max_delay, base_delay * 2 ** (attempt - 1)))
                     logger.warning("%s failed (%s); retry %d in %.2fs", _name(func), error, attempt, delay)
                     sleep(delay)
             raise AssertionError("unreachable")  # pragma: no cover
@@ -233,13 +233,6 @@ def load_menu(text: str) -> list[str]:
     :returns: The dishes
     """
     return [line.strip() for line in text.splitlines() if line.strip()]
-
-
-@dataclasses.dataclass(frozen=True)
-class _Order:
-    dish: str
-    price: Decimal
-    at: datetime
 
 
 def demo() -> None:

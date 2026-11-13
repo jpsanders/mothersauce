@@ -18,7 +18,15 @@ Feature: Loading the ticket feed
     When the pipeline runs
     And the pipeline runs again
     Then 0 lines are loaded
-    And 12 lines are skipped as already loaded
+    And 12 lines were already loaded
+
+  Scenario: A line that arrives late for an earlier ticket still loads
+    Given the staff meal is approved by the head chef
+    When the pipeline runs
+    And a second dish is added to the first ticket
+    And the pipeline runs again
+    Then 1 line is loaded
+    And 12 lines were already loaded
 
   Scenario: Without approval the staff meal is held back
     When the pipeline runs

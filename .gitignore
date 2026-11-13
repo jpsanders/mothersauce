@@ -7,7 +7,7 @@ __pycache__
 .terraform
 .terraform.lock.hcl
 
-# Per-user config such as the following should generally be stored in ~/.gitignore rather than here
+# Per user config such as the following belongs in your global ignore file, not here
 #.python-version
 #.envrc
 
@@ -19,3 +19,6 @@ __pycache__
 
 # Written by setuptools_scm at build and install time
 /src/mothersauce/_version.py
+
+# Tracked on purpose, whatever a global ignore file says
+!/.editorconfig

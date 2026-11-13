@@ -20,9 +20,9 @@ Install: `uv tool install git+https://github.com/jpsanders/mothersauce`. Then `m
 
 - [workflow](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/workflow.md): pyenv and pyenv-virtualenv, make targets, and CI that runs exactly what your machine runs.
 - [layout](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/layout.md): The src layout: one package, one concept per module, tests that mirror it, data shipped inside.
-- [style](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/style.md): Nine checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more.
+- [style](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/style.md): Ten checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more.
 - [dataclasses](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/value_objects.py): Small, honest value objects: frozen, slotted, validated, replaced rather than mutated.
-- [pydantic](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/models.py): Parse, don't validate, at the edges: strict models, reusable constraints, discriminated unions.
+- [pydantic](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/models.py): Parse, don't validate, at the edges: frozen models that forbid extras, reusable constraints, unions.
 - [enums](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/enums.py): Closed sets of names: StrEnum, IntEnum, Flag, a state machine, and exhaustive match with assert_never.
 - [abstractions](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/abstractions.py): ABCs for families you own, with a template method; Protocols for shapes you accept.
 - [factories](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/factories.py): Decide which class to build in one place: registries, __init_subclass__, from_ constructors, plugins.
@@ -33,14 +33,14 @@ Install: `uv tool install git+https://github.com/jpsanders/mothersauce`. Then `m
 - [oop](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/oop.py): Composition over inheritance, dunder protocols, properties, descriptors and __slots__.
 - [data-structures](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/data_structures.py): The container that makes the code obvious: Counter, deque, heapq, bisect, ChainMap, graphlib.
 - [errors](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/errors.py): A hierarchy you can catch, chains you can follow, and batches that report every failure at once.
-- [sql](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/sql.py): Injection proof queries with t-strings, schema evolution, idempotent upserts and high watermarks.
+- [sql](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/sql.py): Injection proof queries with template strings, schema evolution, idempotent upserts and high watermarks.
 - [data-quality](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/quality.py): Rules as data, severities, quarantine, and overrides with an audit trail.
-- [pipeline](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/pipeline.py): Every recipe plated together: a small, real ETL with quality rules, upserts, watermarks and JSON logs.
+- [pipeline](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/pipeline.py): Most recipes plated together: a small, real ETL with quality rules, upserts by key and JSON logs.
 - [logging](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/logs.py): JSON lines with a run id from a ContextVar, secrets redacted, configured once with dictConfig.
 - [config](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/config.py): One frozen settings object from defaults, TOML, environment and flags, with where each value came from.
 - [concurrency](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/concurrency.py): Wait for many slow things at once, bounded, in order, without losing a single error.
 - [performance](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/recipes/performance.py): Measure first, then make the common path cheap: lazy imports, timeit, import costs.
-- [cli](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/cli.py): This package's own CLI: subcommands, --json on everything, real exit codes, a man page, lazy imports.
+- [cli](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/cli.py): This package's own CLI: subcommands, --json wherever there is data, exit codes, a man page, lazy imports.
 - [mcp-server](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/mcp.py): This package's own MCP server: JSON-RPC over stdio with tools, resources and prompts.
 - [testing](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/testing.md): Fixtures, parametrize, fakes over mocks, doctests and a coverage gate: nothing broken leaves the pass.
 - [bdd](https://github.com/jpsanders/mothersauce/blob/main/src/mothersauce/data/practice/bdd.md): Gherkin features run by pytest-bdd: behaviour written so a person can read it and pytest can run it.

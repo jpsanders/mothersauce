@@ -19,7 +19,7 @@ import queue
 import threading
 import time
 from collections.abc import Awaitable, Callable, Generator, Iterable
-from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, as_completed, wait
 
 __all__ = ["bounded_map", "demo", "fetch_all", "gather_limited", "run_workers"]
 
@@ -47,25 +47,33 @@ def fetch_all[K, R](keys: Iterable[K], fetch: Callable[[K], R], workers: int = 8
 
 def bounded_map[T, R](
     func: Callable[[T], R], items: Iterable[T], workers: int = 4, in_flight: int = 16
-) -> Generator[R]:
+) -> Generator[tuple[T, R | Exception]]:
     """
     Map over a stream of any length with at most ``in_flight`` calls submitted at a time, yielding as they finish.
+
+    A failure is yielded like a result, next to the item that caused it, so one bad item never hides the rest.
 
     :param func: The function to run on each item
     :param items: The stream; it is read only as fast as the workers keep up
     :param workers: Threads in the pool
     :param in_flight: The most submitted but unfinished calls
-    :yields: Each result, in completion order
+    :yields: Each item with its result or its exception, in completion order
     """
+
+    def outcome(future: Future[R]) -> R | Exception:
+        error = future.exception()
+        return future.result() if error is None else error  # type: ignore[return-value]
+
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        pending: set[Future[R]] = set()
+        pending: dict[Future[R], T] = {}
         for item in items:
             if len(pending) >= in_flight:
-                done, pending = wait(pending, return_when=FIRST_COMPLETED)
-                yield from (future.result() for future in done)
-            pending.add(pool.submit(func, item))
-        for future in pending:
-            yield future.result()
+                done, _ = wait(pending, return_when=FIRST_COMPLETED)
+                for future in done:
+                    yield pending.pop(future), outcome(future)
+            pending[pool.submit(func, item)] = item
+        for future in as_completed(pending):
+            yield pending[future], outcome(future)
 
 
 async def gather_limited[R](jobs: Iterable[Callable[[], Awaitable[R]]], limit: int, timeout: float) -> list[R]:
@@ -147,7 +155,8 @@ def demo() -> None:
     elapsed = time.perf_counter() - started
     failed = [k for k, v in prices.items() if isinstance(v, Exception)]
     print(f"{len(prices)} suppliers in {elapsed:.2f}s instead of {0.05 * len(prices):.2f}s; {len(failed)} failed")
-    squares = sorted(bounded_map(lambda n: n * n, range(1000), workers=4, in_flight=8))
+    outcomes = bounded_map(lambda n: n * n, range(1000), workers=4, in_flight=8)
+    squares = sorted(result for _, result in outcomes if not isinstance(result, Exception))
     print(f"bounded_map over 1,000 items, never more than 8 in flight: sum {sum(squares):,}")
     running = peak = 0
 

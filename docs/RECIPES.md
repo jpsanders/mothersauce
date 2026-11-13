@@ -27,7 +27,7 @@ The src layout: one package, one concept per module, tests that mirror it, data 
 
 ### Code style
 
-Nine checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more.
+Ten checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more.
 
 - **Id:** `style`, practice; source [`src/mothersauce/data/practice/style.md`](src/mothersauce/data/practice/style.md)
 - **Python:** `black 120`, `mypy --strict`, `Sphinx docstrings`, `absolute imports`, `# nosec <code>  # reason`
@@ -50,7 +50,7 @@ Small, honest value objects: frozen, slotted, validated, replaced rather than mu
 
 ### Pydantic models
 
-Parse, don't validate, at the edges: strict models, reusable constraints, discriminated unions.
+Parse, don't validate, at the edges: frozen models that forbid extras, reusable constraints, unions.
 
 - **Id:** `pydantic`, code; source [`src/mothersauce/recipes/models.py`](src/mothersauce/recipes/models.py)
 - **Tests:** [`tests/mothersauce/recipes/test_models.py`](tests/mothersauce/recipes/test_models.py)
@@ -173,13 +173,13 @@ A hierarchy you can catch, chains you can follow, and batches that report every 
 
 ### SQL loading
 
-Injection proof queries with t-strings, schema evolution, idempotent upserts and high watermarks.
+Injection proof queries with template strings, schema evolution, idempotent upserts and high watermarks.
 
 - **Id:** `sql`, code; source [`src/mothersauce/recipes/sql.py`](src/mothersauce/recipes/sql.py)
 - **Tests:** [`tests/mothersauce/recipes/test_sql.py`](tests/mothersauce/recipes/test_sql.py)
 - **Python:** `t"..."`, `string.templatelib`, `{table:id}`, `ON CONFLICT DO UPDATE`, `executemany`, `PRAGMA table_info`
 - **Use it when:** Loading records into a database; Any SQL that includes a value from outside
-- **Avoid it when:** Building SQL with f-strings, ever
+- **Avoid it when:** Formatting values into SQL text, ever
 - **Related:** `context-managers`, `pipeline`, `data-quality`
 
 ### Data quality
@@ -195,11 +195,11 @@ Rules as data, severities, quarantine, and overrides with an audit trail.
 
 ### The pipeline
 
-Every recipe plated together: a small, real ETL with quality rules, upserts, watermarks and JSON logs.
+Most recipes plated together: a small, real ETL with quality rules, upserts by key and JSON logs.
 
 - **Id:** `pipeline`, code; source [`src/mothersauce/recipes/pipeline.py`](src/mothersauce/recipes/pipeline.py)
 - **Tests:** [`tests/mothersauce/recipes/test_pipeline.py`](tests/mothersauce/recipes/test_pipeline.py)
-- **Python:** `make_source`, `check_batch`, `FeedLine model`, `upsert`, `Watermark`, `log_context`, `Summary`
+- **Python:** `make_source`, `check_batch`, `FeedLine model`, `upsert`, `exactly once by key`, `log_context`, `Summary`
 - **Use it when:** Seeing how the recipes compose in one place; Starting an ingestion job
 - **Avoid it when:** Copying it whole: take the parts your job needs
 - **Related:** `sql`, `data-quality`, `generators`
@@ -252,11 +252,11 @@ Measure first, then make the common path cheap: lazy imports, timeit, import cos
 
 ### Command line interface
 
-This package's own CLI: subcommands, --json on everything, real exit codes, a man page, lazy imports.
+This package's own CLI: subcommands, --json wherever there is data, exit codes, a man page, lazy imports.
 
 - **Id:** `cli`, code; source [`src/mothersauce/cli.py`](src/mothersauce/cli.py)
 - **Tests:** [`tests/mothersauce/test_cli.py`](tests/mothersauce/test_cli.py)
-- **Python:** `argparse subparsers`, `lazy import`, `--json`, `importlib.resources`, `sys.exit(main())`
+- **Python:** `argparse subparsers`, `lazy import`, `--json`, `importlib.resources`, `raise SystemExit(main())`
 - **Use it when:** Any tool people or agents run from a shell
 - **Avoid it when:** Interactive prompts in a tool that scripts and agents will call
 - **Related:** `mcp-server`, `layout`, `performance`
@@ -267,7 +267,7 @@ This package's own MCP server: JSON-RPC over stdio with tools, resources and pro
 
 - **Id:** `mcp-server`, code; source [`src/mothersauce/mcp.py`](src/mothersauce/mcp.py)
 - **Tests:** [`tests/mothersauce/test_mcp.py`](tests/mothersauce/test_mcp.py)
-- **Python:** `json`, `sys.stdin lines`, `dispatch dict`, `TypedDict`, `read only tool annotations`
+- **Python:** `json`, `sys.stdin lines`, `a dispatch table`, `JSON-RPC error codes`, `read only tool annotations`
 - **Use it when:** Giving AI agents your tool's data and actions; A server that must start in milliseconds
 - **Avoid it when:** Streaming or authenticated remote servers: use the official SDK there
 - **Related:** `cli`, `abstractions`, `errors`

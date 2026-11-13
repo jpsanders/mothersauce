@@ -10,7 +10,7 @@ The first release.
   dataclasses, pydantic, enums, abstractions, factories, generics, generators, context managers, decorators, object
   oriented design, data structures, errors, SQL, data quality, a pipeline that composes them, structured logging,
   configuration, concurrency, performance, the CLI and the MCP server. 5 practice recipes: the workflow, layout, style,
-  testing and behaviour driven tests.
+  testing and behaviour driven tests. The pipeline loads exactly once by key, so a late or corrected line still lands.
 - Python 3.15 used where it helps: `lazy import`, `frozendict`, `sentinel()`, unpacking in comprehensions, closed
   `TypedDict`, template strings for SQL, and the generics syntax with defaults.
 - `mothersauce`: `list`, `show`, `run`, `search`, `style`, `guide`, `man`, `mcp`, `integrate`, `skill` and `doctor`,

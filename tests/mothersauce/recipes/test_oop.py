@@ -81,3 +81,10 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert "descriptor caught it: celsius must be -30 to 15, got 40" in out
     assert "with __slots__" in out
+
+
+def test_shift_compares_only_with_shifts() -> None:
+    shift = Shift.from_text("07:00-15:00")
+    assert shift.__lt__("07:00") is NotImplemented
+    with pytest.raises(TypeError):
+        shift < "07:00"

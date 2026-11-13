@@ -7,7 +7,7 @@ memory of one row. Nothing runs until something consumes the pipeline, and when 
 
 The building blocks:
 
-- a streaming reader whose file closes even when the consumer stops early;
+- a streaming reader whose file closes when the lines run out or the consumer closes the generator;
 - stages that parse, filter and group, each a few lines;
 - ``itertools.batched`` for bulk writes, and a ``deque`` with ``maxlen`` for sliding windows;
 - ``yield from``, and unpacking in a generator expression (new in Python 3.15) to flatten;
@@ -18,8 +18,10 @@ The building blocks:
 import csv
 import sys
 import tempfile
+import tracemalloc
 from collections import deque
 from collections.abc import Callable, Generator, Iterable, Iterator
+from contextlib import closing
 from itertools import batched, groupby, islice
 from pathlib import Path
 
@@ -41,8 +43,9 @@ def read_lines(path: Path) -> Generator[str]:
     """
     Stream the non blank lines of a text file without their line endings.
 
-    The ``with`` block lives inside the generator, so the file closes when the lines run out, when the consumer
-    breaks out of its loop, or when the generator is garbage collected, whichever comes first.
+    The ``with`` block lives inside the generator, so the file closes when the lines run out, when the generator is
+    closed, or when it is garbage collected. Breaking out of a ``for`` loop does none of these, so a consumer that may
+    stop early should close it on purpose: ``with contextlib.closing(read_lines(path)) as lines:``.
 
     :param path: The file
     :yields: One line at a time
@@ -189,15 +192,20 @@ def demo() -> None:
         lines = ["ticket_id,dish,quantity"] + [f"T-{1000 + n},dish {n % 3},{n % 4 + 1}" for n in range(10)]
         path.write_text("\n".join(lines) + "\n", encoding="utf-8")
         log: list[str] = []
-        records = ((row["ticket_id"], int(row["quantity"])) for row in parse_rows(read_lines(path)))
-        read = traced(records, "read", log)
-        big = traced((ticket for ticket, quantity in where(read, lambda r: r[1] > 2)), "kept", log)
-        print("nothing has run yet:", log == [])
-        print("first two kept:", list(islice(big, 2)))
-        print("each record went through every stage before the next was read:", log[:4])
-    numbers_list = [n for n in range(1_000_000)]
-    numbers_lazy = (n for n in range(1_000_000))
-    print(f"a million ints: list {sys.getsizeof(numbers_list):,} bytes, generator {sys.getsizeof(numbers_lazy)} bytes")
+        with closing(read_lines(path)) as stream:  # stopping after two rows: close the file on purpose
+            records = ((row["ticket_id"], int(row["quantity"])) for row in parse_rows(stream))
+            read = traced(records, "read", log)
+            big = traced((ticket for ticket, quantity in where(read, lambda r: r[1] > 2)), "kept", log)
+            print("nothing has run yet:", log == [])
+            print("first two kept:", list(islice(big, 2)))
+            print("each record went through every stage before the next was read:", log[:4])
+    tracemalloc.start()
+    numbers_list = [n * 1000 for n in range(1_000_000)]
+    held = tracemalloc.get_traced_memory()[0]
+    del numbers_list
+    tracemalloc.stop()
+    numbers_lazy = (n * 1000 for n in range(1_000_000))
+    print(f"a million ints: {held / 1e6:,.0f} MB as a list, {sys.getsizeof(numbers_lazy)} bytes as a generator")
     print("batches of 4 for bulk inserts:", [len(b) for b in batched(range(10), 4)])
     print("3 item windows:", list(window("abcde", 3))[:2])
     produce = ["apple", "avocado", "beet", "basil", "corn"]

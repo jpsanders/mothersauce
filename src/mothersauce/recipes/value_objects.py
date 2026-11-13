@@ -126,9 +126,10 @@ class Ticket:
         """
         The sum of every line.
 
-        :returns: The ticket total; zero euros for an empty ticket
+        :returns: The ticket total, in the lines' currency; zero euros for an empty ticket
         """
-        return sum((line.total for line in self.lines), start=Money(Decimal(0)))
+        currency = self.lines[0].unit_price.currency if self.lines else "EUR"
+        return sum((line.total for line in self.lines), start=Money(Decimal(0), currency))
 
     def with_line(self, line: TicketLine) -> Ticket:
         """
@@ -141,7 +142,7 @@ class Ticket:
 
     def as_record(self) -> dict[str, Any]:
         """
-        Flatten to plain data for JSON or a database row. Nested dataclasses become dicts too.
+        Flatten to plain dicts and tuples. Nested dataclasses become dicts; Decimals and datetimes stay as they are.
 
         :returns: The ticket as a dict
         """
@@ -153,7 +154,8 @@ class Watermark:
     """
     How far an incremental load has read. ``order=True`` compares fields in order, so ``max()`` finds the newest.
 
-    The ticket id breaks ties between tickets opened in the same second, which keeps the load exactly once.
+    The ticket id breaks ties between tickets opened in the same second. It must sort in load order, so ids need
+    a fixed width (``T-01001``) or a numeric comparison; ``'T-10' < 'T-9'`` as text.
 
     :param opened_at: The newest timestamp loaded
     :param ticket_id: The newest ticket id at that timestamp
@@ -184,7 +186,8 @@ class BatchStats:
         :param ticket: The ticket
         """
         self.seen += 1
-        self.by_dish.update({line.dish: line.quantity for line in ticket.lines})
+        for line in ticket.lines:
+            self.by_dish[line.dish] += line.quantity
 
     def reject(self) -> None:
         """Count a rejected record."""

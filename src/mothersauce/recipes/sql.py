@@ -1,7 +1,7 @@
 """
 SQL: injection proof queries, a schema that grows with the data, idempotent loads and incremental extracts.
 
-An f-string puts values straight into SQL, which is how injection happens. A template string, ``t"..."`` (Python
+Formatting a value into SQL text, as ``f"..."`` does, is how injection happens. A template string, ``t"..."`` (Python
 3.14), keeps the literal text and the values apart, so :func:`sql` can turn every value into a ``?`` parameter. Table
 and column names cannot be parameters, so they take a format spec instead, ``{table:id}``, and are checked against
 a strict pattern before they are quoted. Unsafe SQL is then impossible to write by accident, even in your own DDL.
@@ -13,7 +13,11 @@ The loading patterns every warehouse load needs:
 - Batches of ``executemany`` inside one transaction, which is many times faster than one commit per row.
 - A high watermark: extract only the rows newer than the last run, ordered so the new watermark is the last row.
 
-This uses ``sqlite3`` from the standard library; the same shapes work with any DB API driver.
+This uses ``sqlite3`` from the standard library. The shapes carry over to other drivers, which need their own
+parameter style (``%s`` for psycopg) and their own catalogue query in place of ``PRAGMA table_info``.
+
+Money goes in as text. A column declared NUMERIC turns ``'31.50'`` into the float 31.5, so cents drift exactly as
+they would in a float; a TEXT column keeps the digits, and ``Decimal`` reads them back unchanged.
 """
 
 import re
@@ -111,18 +115,18 @@ def sql(query: Template) -> tuple[str, tuple[object, ...]]:
 
 def sql_type(value: object) -> str:
     """
-    Choose a column type for a Python value. ``bool`` is checked before ``int``, because it is a subclass of it.
+    Choose a column type for a Python value. ``Decimal`` gets TEXT, so its digits survive the round trip.
 
     :param value: A sample value
     :returns: One of :data:`SQL_TYPES`
     """
     match value:
-        case bool() | int():
+        case int():  # bool is an int subclass, so True lands here too, as 1
             return "INTEGER"
         case float():
             return "REAL"
         case Decimal():
-            return "NUMERIC"
+            return "TEXT"
         case bytes():
             return "BLOB"
         case _:
@@ -185,10 +189,8 @@ def upsert(
         columns = list(dict.fromkeys(name for row in batch for name in row))
         sample = {name: next((row[name] for row in batch if row.get(name) is not None), "") for name in columns}
         others = [name for name in columns if name != key]
-        text, _ = sql(
-            t"INSERT INTO {table:id} ({columns:ids}) VALUES ({columns:params}) "
-            t"ON CONFLICT ({key:id}) DO UPDATE SET {others:excluded}"
-        )
+        insert = t"INSERT INTO {table:id} ({columns:ids}) VALUES ({columns:params}) ON CONFLICT ({key:id}) "
+        text, _ = sql(insert + (t"DO UPDATE SET {others:excluded}" if others else Template("DO NOTHING")))
         with Transaction(conn) as cur:
             ensure_table(conn, table, sample, key)
             cur.executemany(text, [tuple(_adapt(row.get(name)) for name in columns) for row in batch])
@@ -197,22 +199,33 @@ def upsert(
 
 
 def extract_since(
-    conn: sqlite3.Connection, table: str, column: str, watermark: object
-) -> tuple[list[dict[str, Any]], object]:
+    conn: sqlite3.Connection, table: str, column: str, key: str, watermark: tuple[object, object] | None
+) -> tuple[list[dict[str, Any]], tuple[object, object] | None]:
     """
-    Read only the rows newer than the watermark, oldest first, and return the new watermark with them.
+    Read only the rows after the watermark, oldest first, and return the new watermark with them.
+
+    Timestamps tie, so the watermark is a pair: the column and the key. Rows compare as ``(column, key)`` tuples, so
+    a row that arrives later with the same timestamp as the last one read is still found by the next run.
 
     :param conn: The connection
     :param table: The table
-    :param column: The ever increasing column, such as an updated timestamp
-    :param watermark: The value the last run ended at
+    :param column: The column that only grows, such as an updated timestamp
+    :param key: The unique key that breaks ties
+    :param watermark: Where the last run ended; None to read everything
     :returns: The new rows, and the watermark for the next run (unchanged when nothing is new)
     """
-    query = sql(t"SELECT * FROM {table:id} WHERE {column:id} > {watermark} ORDER BY {column:id}")
+    if watermark is None:
+        query = sql(t"SELECT * FROM {table:id} ORDER BY {column:id}, {key:id}")
+    else:
+        last, last_key = watermark
+        query = sql(
+            t"SELECT * FROM {table:id} WHERE ({column:id}, {key:id}) > ({last}, {last_key}) "
+            t"ORDER BY {column:id}, {key:id}"
+        )
     cursor = conn.execute(*query)
     names = [d[0] for d in cursor.description]
     rows = [dict(zip(names, values, strict=True)) for values in cursor]
-    return rows, (rows[-1][column] if rows else watermark)
+    return rows, ((rows[-1][column], rows[-1][key]) if rows else watermark)
 
 
 def demo() -> None:
@@ -231,11 +244,13 @@ def demo() -> None:
     upsert(conn, "tickets", lunch, key="ticket_id")
     upsert(conn, "tickets", lunch, key="ticket_id")
     print(f"loaded lunch twice, rows in table: {conn.execute('SELECT count(*) FROM tickets').fetchone()[0]}")
-    _, watermark = extract_since(conn, "tickets", "updated_at", "")
+    _, watermark = extract_since(conn, "tickets", "updated_at", "ticket_id", None)
     dinner = [{"ticket_id": "T-1002", "dish": "tart", "tip": 2, "updated_at": "2026-11-12T19:40"}]
     upsert(conn, "tickets", dinner, key="ticket_id")
     columns = [row[1] for row in conn.execute("PRAGMA table_info(tickets)")]
     print(f"a new field added a column: {columns}")
-    rows, watermark = extract_since(conn, "tickets", "updated_at", watermark)
+    rows, watermark = extract_since(conn, "tickets", "updated_at", "ticket_id", watermark)
     print(f"incremental extract since lunch: {[(r['ticket_id'], r['tip']) for r in rows]}, next watermark {watermark}")
+    price = conn.execute("SELECT price FROM tickets WHERE ticket_id = 'T-1001'").fetchone()[0]
+    print(f"money kept its cents: {price!r} reads back as {Decimal(price)!r}")
     conn.close()

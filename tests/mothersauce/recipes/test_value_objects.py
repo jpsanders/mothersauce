@@ -103,3 +103,14 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     demo()
     out = capsys.readouterr().out
     assert "total 33.00 EUR" in out and "newest watermark: T-1003" in out
+
+
+def test_batch_stats_add_up_a_repeated_dish() -> None:
+    stats = BatchStats()
+    stats.record(Ticket(ticket_id="T-1", table=1, opened_at=OPENED, lines=(line(quantity=2), line(quantity=3))))
+    assert stats.by_dish == {"bearnaise": 5}
+
+
+def test_total_keeps_the_lines_currency() -> None:
+    usd = TicketLine(dish="soup", quantity=2, unit_price=Money(Decimal("4"), "USD"))
+    assert Ticket(ticket_id="T-1", table=1, opened_at=OPENED, lines=(usd,)).total == Money(Decimal(8), "USD")

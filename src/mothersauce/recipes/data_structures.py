@@ -106,15 +106,22 @@ def merge_by_time(*streams: Iterable[Reading]) -> Iterator[Reading]:
     return heapq.merge(*streams, key=lambda reading: reading.at)
 
 
-def price_band(price: Decimal, bounds: tuple[int, ...] = (10, 20, 30)) -> str:
+def price_band(
+    price: Decimal,
+    bounds: tuple[int, ...] = (10, 20, 30),
+    names: tuple[str, ...] = ("snack", "starter", "main", "special"),
+) -> str:
     """
     Place a price in a band with a binary search over the band boundaries.
 
     :param price: The price
     :param bounds: Ascending upper bounds of every band but the last
+    :param names: One name per band: one more than the bounds
     :returns: The band's name
+    :raises ValueError: When there is not exactly one more name than bounds
     """
-    names = ("snack", "starter", "main", "special")
+    if len(names) != len(bounds) + 1:
+        raise ValueError(f"{len(bounds)} bounds make {len(bounds) + 1} bands, but {len(names)} names were given")
     return names[bisect.bisect_right(bounds, price)]
 
 

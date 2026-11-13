@@ -44,7 +44,10 @@ def test_load_config_needs_the_kitchen_table() -> None:
         load_config("[bar]\n")
 
 
-@pytest.mark.parametrize(("value", "expected"), [("7", 7), (" 7 ", 7), ("seven", None), (None, None), (7.9, 7)])
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [("7", 7), (" 7 ", 7), ("seven", None), (None, None), (7.0, 7), (7.9, None), (True, None)],
+)
 def test_to_int_or_none(value: object, expected: int | None) -> None:
     assert to_int_or_none(value) == expected
 
@@ -119,3 +122,9 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert "3 bad records, every one reported" in out
     assert "handled separately: ['SourceError: dinner.csv: file not found']" in out
+
+
+@pytest.mark.parametrize("price", ["NaN", "Infinity", "-1"])
+def test_parse_order_refuses_impossible_prices(price: str) -> None:
+    with pytest.raises(RecordError, match="finite amount of zero or more"):
+        parse_order(1, {**GOOD, "price": price})

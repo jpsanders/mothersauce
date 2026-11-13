@@ -19,9 +19,10 @@ make format      # black and isort
 make checks      # every check CI runs, in the same order
 ```
 
-`make checks` runs isort, black, editorconfig-checker, darglint, flake8, mypy in strict mode, bandit, the docs and man
+`make checks` runs editorconfig-checker, black, isort, bandit, flake8, darglint, mypy in strict mode, the docs and man
 page freshness checks, and pytest with doctests, the pytest-bdd scenarios and a 95% coverage floor. CI runs the same
-on Linux and macOS, then installs the built wheel in a clean environment and uses every command.
+checks in the same order, the static ones on Linux and the tests on Linux and macOS, then installs the built wheel in
+a clean environment and runs its commands.
 
 ## A good recipe
 

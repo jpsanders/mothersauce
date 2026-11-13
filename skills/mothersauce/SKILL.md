@@ -55,5 +55,6 @@ mothersauce list                              # the whole menu
 - Copy the shape of a recipe, not its names: the recipes use a restaurant's ticket feed as their example domain.
 - Follow the house style (`mothersauce style`): strict typing, Sphinx docstrings, absolute imports, no print in
   library code, untrusted input parsed at the edge, every acquire in a `with` block.
-- A few recipes use Python 3.15 features (`lazy import`, `frozendict`, `sentinel`). On an older Python keep the
-  pattern and swap the feature: a normal import, a `MappingProxyType`, an `object()` sentinel.
+- A few recipes use Python 3.15 features. On an older Python keep the pattern and swap the feature: `lazy import`
+  for a normal import, `frozendict` for a `MappingProxyType`, `sentinel()` for an `object()`, unpacking in a
+  comprehension for `itertools.chain.from_iterable`, and a closed `TypedDict` for `typing_extensions.TypedDict`.

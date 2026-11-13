@@ -5,7 +5,7 @@ Two tools, two jobs.
 
 An abstract base class says "every member of this family has these methods" and can carry the shared behaviour. Use
 it for a family you own, where the base class holds the algorithm and each subclass fills in the steps: the template
-method pattern. Python refuses to create a subclass that forgot a step, at the line that creates it.
+method pattern. Python refuses to instantiate a subclass that forgot a step, with an error that names it.
 
 A ``Protocol`` says "anything with these methods will do", and mypy checks it without any inheritance. Use it at the
 boundary, for things you accept but do not own: a file, a client from another library, a fake in a test. Code that
@@ -17,6 +17,7 @@ import json
 import tempfile
 from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterable, Iterator, Mapping, Sequence
+from contextlib import closing
 from itertools import batched
 from pathlib import Path
 from typing import IO, Protocol, runtime_checkable
@@ -48,7 +49,7 @@ class TicketSource(ABC):
 
     def read(self) -> Generator[Row]:
         """
-        Open, yield every clean non empty row, and always close, even when the caller stops early.
+        Open, yield every clean non empty row, and close when the rows run out or the generator is closed.
 
         :yields: Rows with lower case keys and stripped values
         """
@@ -83,7 +84,8 @@ class TicketSource(ABC):
         :param raw: The row as parsed
         :returns: The clean row; empty when every cell was blank
         """
-        return {str(k).strip().lower(): str(v).strip() for k, v in raw.items() if k and v not in (None, "")}
+        cells = {str(k).strip().lower(): str(v).strip() for k, v in raw.items() if k and v is not None}
+        return {k: v for k, v in cells.items() if v}
 
 
 class CsvTicketSource(TicketSource):
@@ -157,8 +159,6 @@ def copy_rows(source: TicketSource, sink: Sink, batch_size: int = 500) -> int:
     written = 0
     for batch in batched(source.read(), batch_size):
         written += sink.write(batch)
-    if isinstance(sink, Closeable):
-        sink.close()
     return written
 
 
@@ -191,12 +191,13 @@ def demo() -> None:
         csv_path.write_text("Ticket_ID, Dish ,Quantity\nT-1001, steak frites ,2\n,,\nT-1002,bearnaise,1\n", "utf-8")
         jsonl_path = Path(folder) / "tickets.jsonl"
         jsonl_path.write_text('{"ticket_id": "T-1003", "dish": "creme brulee", "quantity": 3}\n\n', "utf-8")
-        sink = ListSink()
-        for source in (CsvTicketSource(csv_path), JsonLinesTicketSource(jsonl_path)):
-            copied = copy_rows(source, sink)
-            print(f"{type(source).__name__}: copied {copied}, read {source.rows_read}, blank rows skipped")
-        print(f"first row, cleaned: {sink.rows[0]}")
-        print(f"sink closed through the runtime checkable Protocol: {sink.closed}")
+        with closing(ListSink()) as sink:  # whoever opens a resource closes it; copy_rows only borrows the sink
+            for source in (CsvTicketSource(csv_path), JsonLinesTicketSource(jsonl_path)):
+                copied = copy_rows(source, sink)
+                print(f"{type(source).__name__}: copied {copied}, read {source.rows_read}, blank rows skipped")
+            print(f"first row, cleaned: {sink.rows[0]}")
+            print(f"the sink has close(), so the runtime checkable Protocol matches: {isinstance(sink, Closeable)}")
+        print(f"and closing() closed it at the end of the block: {sink.closed}")
     try:
         TicketSource()  # type: ignore[abstract]
     except TypeError as error:

@@ -71,6 +71,7 @@ def from_env(environ: Mapping[str, str], prefix: str = ENV_PREFIX) -> dict[str, 
     :param environ: Usually ``os.environ``
     :param prefix: Only variables with this prefix count
     :returns: The settings they describe, as nested dicts of strings
+    :raises ValueError: When one variable names a value and another a section at the same place
     """
     found: dict[str, Any] = {}
     for name, value in environ.items():
@@ -80,6 +81,10 @@ def from_env(environ: Mapping[str, str], prefix: str = ENV_PREFIX) -> dict[str, 
         section = found
         for parent in parents:
             section = section.setdefault(parent, {})
+            if not isinstance(section, dict):
+                raise ValueError(f"{name} puts a key inside {prefix}{parent.upper()}, which is a value, not a section")
+        if isinstance(section.get(leaf), dict):
+            raise ValueError(f"{name} sets a value where other variables already define a section")
         section[leaf] = value
     return found
 

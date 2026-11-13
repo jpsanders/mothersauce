@@ -137,3 +137,19 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert "still reads 'soup of the day'" in out
     assert "committed: ['T-1']" in out
+
+
+def test_atomic_write_keeps_the_file_mode(tmp_path: Path) -> None:
+    target = tmp_path / "shared.csv"
+    target.write_text("old", encoding="utf-8")
+    target.chmod(0o644)
+    with atomic_write(target) as handle:
+        handle.write("new")
+    assert target.stat().st_mode & 0o777 == 0o644
+
+
+def test_atomic_write_creates_a_readable_new_file(tmp_path: Path) -> None:
+    target = tmp_path / "new.csv"
+    with atomic_write(target) as handle:
+        handle.write("new")
+    assert target.stat().st_mode & 0o044, "a new file follows the umask, not a private temp file's 0600"

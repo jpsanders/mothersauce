@@ -144,7 +144,9 @@ class Shift:
             return NotImplemented
         return (self.start, self.end) == (other.start, other.end)
 
-    def __lt__(self, other: Shift) -> bool:
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, Shift):
+            return NotImplemented
         return (self.start, self.end) < (other.start, other.end)
 
     def __hash__(self) -> int:

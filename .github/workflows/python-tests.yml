@@ -1,5 +1,4 @@
 ---
-# This is nearly identical to `python-tests-with-db.yml` and both should be updated in tandem where appropriate.
 name: python-tests
 
 on:

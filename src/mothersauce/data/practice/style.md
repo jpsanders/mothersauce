@@ -1,6 +1,6 @@
 # House style
 
-The rules a reviewer would otherwise repeat, in one place. Nine checks enforce most of them (`make checks`); the rest
+The rules a reviewer would otherwise repeat, in one place. Ten checks enforce most of them (`make checks`); the rest
 are the habits the recipes show.
 
 ## Enforced by the checks
@@ -12,7 +12,8 @@ are the habits the recipes show.
   against the signature by darglint. The first line is an imperative sentence: "Return the total", not "Returns".
 - **Imports:** absolute only (`from mothersauce.recipes import sql`); relative imports fail flake8.
 - **Security:** bandit on every push. A justified exception reads `# nosec B603  # fixed arguments, never a shell`.
-- **Files:** editorconfig: spaces, Unix line endings, a final newline, and 120 columns in every file type.
+- **Files:** editorconfig: spaces and Unix line endings in code and configuration, a final newline everywhere, and
+  120 columns except in the README and generated pages.
 
 ## Habits the recipes show
 

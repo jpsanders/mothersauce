@@ -134,3 +134,14 @@ module = "mothersauce.cli"
 def test_load_refuses_a_broken_catalogue(text: str, message: str) -> None:
     with pytest.raises(CatalogueError, match=message):
         _load(text)
+
+
+@pytest.mark.parametrize("name", ["", "   ", "_"])
+def test_a_blank_name_is_not_a_recipe(name: str) -> None:
+    with pytest.raises(CatalogueError, match="a recipe id is required"):
+        get(name)
+
+
+def test_search_needs_a_positive_limit() -> None:
+    with pytest.raises(ValueError, match="at least 1"):
+        search("retry", limit=0)

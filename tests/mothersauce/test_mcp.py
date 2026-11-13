@@ -4,6 +4,7 @@ from typing import Any
 
 import pytest
 
+from mothersauce import mcp
 from mothersauce.mcp import PROTOCOL_VERSIONS, Server, demo, serve, style_guide
 
 SERVER = Server()
@@ -46,7 +47,7 @@ def test_search_recipes_tool() -> None:
     result = tool("search_recipes", query="retry a flaky api call", limit=3)
     assert result["isError"] is False
     assert result["structuredContent"]["results"][0]["id"] == "decorators"
-    assert json.loads(result["content"][0]["text"])[0]["id"] == "decorators"
+    assert json.loads(result["content"][0]["text"]) == result["structuredContent"]
 
 
 def test_get_recipe_tool_parts() -> None:
@@ -90,7 +91,9 @@ def test_resources() -> None:
     assert text.startswith("# SQL loading")
     style = call("resources/read", {"uri": "mothersauce://style"})["result"]["contents"][0]
     assert style["mimeType"] == "text/markdown"
-    assert call("resources/read", {"uri": "https://example.com"})["error"]["code"] == -32602
+    missing = call("resources/read", {"uri": "https://example.com"})["error"]
+    assert missing["code"] == -32002 and missing["data"] == {"uri": "https://example.com"}
+    assert call("resources/read", {"uri": "mothersauce://recipes/nope"})["error"]["code"] == -32002
 
 
 def test_prompts() -> None:
@@ -101,7 +104,11 @@ def test_prompts() -> None:
     assert text.startswith("Task: load orders") and "# SQL loading" in text and "# House style" in text
     review = call("prompts/get", {"name": "review_python", "arguments": {"code": "print(1)"}})
     assert "print(1)" in review["result"]["messages"][0]["content"]["text"]
-    assert call("prompts/get", {"name": "nope"})["error"]["code"] == -32601
+    assert call("prompts/get", {"name": "nope"})["error"]["code"] == -32602
+    assert (
+        "missing required arguments: task"
+        in call("prompts/get", {"name": "apply_recipe", "arguments": {"recipe": "sql"}})["error"]["message"]
+    )
 
 
 def test_serve_reads_lines_and_answers_lines() -> None:
@@ -131,3 +138,61 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert "<- list_recipes, search_recipes, get_recipe, get_style_guide" in out
     assert "<- # Generators" in out
+
+
+@pytest.mark.parametrize(
+    ("arguments", "error"),
+    [
+        ({"query": "retry", "limit": "five"}, "limit must be a whole number from 1 to 30"),
+        ({"query": "retry", "limit": 0}, "limit must be a whole number from 1 to 30"),
+        ({"query": "retry", "limit": True}, "limit must be a whole number from 1 to 30"),
+        ({"query": 3}, "query is required"),
+    ],
+)
+def test_bad_tool_arguments_are_readable_errors(arguments: dict[str, Any], error: str) -> None:
+    result = tool("search_recipes", **arguments)
+    assert result["isError"] is True and error in result["content"][0]["text"]
+
+
+def test_null_optional_arguments_mean_the_default() -> None:
+    assert tool("search_recipes", query="retry", limit=None)["isError"] is False
+    assert tool("get_recipe", id="sql", part=None)["content"][0]["text"].startswith("# SQL loading")
+    assert tool("get_recipe")["isError"] is True
+
+
+@pytest.mark.parametrize(
+    ("message", "code"),
+    [
+        ({"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": "oops"}, -32602),
+        (
+            {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_recipe", "arguments": "x"}},
+            -32602,
+        ),
+        ({"jsonrpc": "2.0", "id": 1}, -32600),
+        ({"jsonrpc": "2.0", "id": 1, "method": 7}, -32600),
+    ],
+)
+def test_malformed_requests_get_errors_not_crashes(message: dict[str, Any], code: int) -> None:
+    reply = SERVER.handle(message)
+    assert reply is not None and reply["error"]["code"] == code
+
+
+def test_an_unexpected_failure_is_an_internal_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    def broken(params: dict[str, Any]) -> dict[str, Any]:
+        raise RuntimeError("bug")
+
+    monkeypatch.setitem(mcp.METHODS, "ping", broken)
+    assert call("ping")["error"]["code"] == -32603
+
+
+def test_serve_answers_invalid_messages_and_carries_on() -> None:
+    stdin = io.StringIO(
+        '[]\n"text"\n[1, {"jsonrpc": "2.0", "id": 5, "method": "ping"}]\n'
+        '{"jsonrpc": "2.0", "id": 6, "method": "ping"}\n'
+    )
+    stdout = io.StringIO()
+    serve(stdin, stdout)
+    replies = [json.loads(line) for line in stdout.getvalue().splitlines()]
+    assert replies[0]["error"]["code"] == -32600 and replies[1]["error"]["code"] == -32600
+    assert [r.get("id") for r in replies[2]] == [None, 5]
+    assert replies[3] == {"jsonrpc": "2.0", "id": 6, "result": {}}

@@ -64,6 +64,10 @@ jobs:
           /tmp/clean/bin/mothersauce run pipeline
           /tmp/clean/bin/mothersauce search retry a flaky api call --json
           /tmp/clean/bin/mothersauce guide | head -3
+          /tmp/clean/bin/mothersauce show bdd > /dev/null
+          /tmp/clean/bin/mothersauce style | head -1
+          /tmp/clean/bin/mothersauce skill | head -1
+          mkdir -p /tmp/home/.cursor && HOME=/tmp/home /tmp/clean/bin/mothersauce integrate --dry-run
           /tmp/clean/bin/mothersauce man --raw | head -1
           /tmp/clean/bin/mothersauce doctor
           printf '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}\n' > /tmp/ask.jsonl

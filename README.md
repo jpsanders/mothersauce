@@ -40,14 +40,14 @@ mothersauce run pipeline
 
 ```text
 $ mothersauce run pipeline
-The pipeline: Every recipe plated together: a small, real ETL with quality rules, upserts, watermarks and JSON logs.
+The pipeline: Most recipes plated together: a small, real ETL with quality rules, upserts by key and JSON logs.
 
-run-1: read 16, loaded 12, skipped 0, quarantined 3, invalid 1 in 98 ms
-run-2: read 16, loaded 0, skipped 12, quarantined 3, invalid 1 in 0 ms
+run-1: read 16, loaded 12, already loaded 0, quarantined 3, invalid 1 in 40 ms
+run-2: read 16, loaded 0, already loaded 12, quarantined 3, invalid 1 in 1 ms
 findings on the first run: {'large_quantity': 1, 'known_station': 1, 'quantity_positive': 1, 'unique_key': 1}
 invalid: ['RecordError: line 16, opened_at: input should have timezone info']
 dishes by station: {'cold': 25, 'sauce': 12, 'grill': 6, 'pastry': 4, 'fry': 2}
-the next run starts after 20:05, line T-1010-1
+prices keep their cents: '31.50'
 4 JSON log lines, each carrying its run id
 ```
 
@@ -60,8 +60,8 @@ writes code that runs but is rarely shaped like this.
 
 Each recipe holds one pattern in one module, written the way it would be in a production codebase: typed for mypy's
 strict mode, documented, tested, and short enough to read in one sitting. The recipes share one example domain, a
-restaurant's ticket feed, so they read as one system, and the last of them, the pipeline, loads that feed using all
-the others.
+restaurant's ticket feed, so they read as one system, and the pipeline recipe loads that feed using most of the
+others.
 
 ## The menu
 
@@ -70,9 +70,9 @@ the others.
 | --- | --- | --- |
 | Mise en place | [`workflow`](src/mothersauce/data/practice/workflow.md) | pyenv and pyenv-virtualenv, make targets, and CI that runs exactly what your machine runs. |
 | Mise en place | [`layout`](src/mothersauce/data/practice/layout.md) | The src layout: one package, one concept per module, tests that mirror it, data shipped inside. |
-| Mise en place | [`style`](src/mothersauce/data/practice/style.md) | Nine checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more. |
+| Mise en place | [`style`](src/mothersauce/data/practice/style.md) | Ten checks that end style arguments: black, isort, flake8, darglint, mypy strict, bandit and more. |
 | Mother sauces | [`dataclasses`](src/mothersauce/recipes/value_objects.py) | Small, honest value objects: frozen, slotted, validated, replaced rather than mutated. |
-| Mother sauces | [`pydantic`](src/mothersauce/recipes/models.py) | Parse, don't validate, at the edges: strict models, reusable constraints, discriminated unions. |
+| Mother sauces | [`pydantic`](src/mothersauce/recipes/models.py) | Parse, don't validate, at the edges: frozen models that forbid extras, reusable constraints, unions. |
 | Mother sauces | [`enums`](src/mothersauce/recipes/enums.py) | Closed sets of names: StrEnum, IntEnum, Flag, a state machine, and exhaustive match with assert_never. |
 | Mother sauces | [`abstractions`](src/mothersauce/recipes/abstractions.py) | ABCs for families you own, with a template method; Protocols for shapes you accept. |
 | Mother sauces | [`factories`](src/mothersauce/recipes/factories.py) | Decide which class to build in one place: registries, __init_subclass__, from_ constructors, plugins. |
@@ -83,14 +83,14 @@ the others.
 | Mother sauces | [`oop`](src/mothersauce/recipes/oop.py) | Composition over inheritance, dunder protocols, properties, descriptors and __slots__. |
 | Mother sauces | [`data-structures`](src/mothersauce/recipes/data_structures.py) | The container that makes the code obvious: Counter, deque, heapq, bisect, ChainMap, graphlib. |
 | Mother sauces | [`errors`](src/mothersauce/recipes/errors.py) | A hierarchy you can catch, chains you can follow, and batches that report every failure at once. |
-| On the line | [`sql`](src/mothersauce/recipes/sql.py) | Injection proof queries with t-strings, schema evolution, idempotent upserts and high watermarks. |
+| On the line | [`sql`](src/mothersauce/recipes/sql.py) | Injection proof queries with template strings, schema evolution, idempotent upserts and high watermarks. |
 | On the line | [`data-quality`](src/mothersauce/recipes/quality.py) | Rules as data, severities, quarantine, and overrides with an audit trail. |
-| On the line | [`pipeline`](src/mothersauce/recipes/pipeline.py) | Every recipe plated together: a small, real ETL with quality rules, upserts, watermarks and JSON logs. |
+| On the line | [`pipeline`](src/mothersauce/recipes/pipeline.py) | Most recipes plated together: a small, real ETL with quality rules, upserts by key and JSON logs. |
 | Service | [`logging`](src/mothersauce/recipes/logs.py) | JSON lines with a run id from a ContextVar, secrets redacted, configured once with dictConfig. |
 | Service | [`config`](src/mothersauce/recipes/config.py) | One frozen settings object from defaults, TOML, environment and flags, with where each value came from. |
 | Service | [`concurrency`](src/mothersauce/recipes/concurrency.py) | Wait for many slow things at once, bounded, in order, without losing a single error. |
 | Service | [`performance`](src/mothersauce/recipes/performance.py) | Measure first, then make the common path cheap: lazy imports, timeit, import costs. |
-| Service | [`cli`](src/mothersauce/cli.py) | This package's own CLI: subcommands, --json on everything, real exit codes, a man page, lazy imports. |
+| Service | [`cli`](src/mothersauce/cli.py) | This package's own CLI: subcommands, --json wherever there is data, exit codes, a man page, lazy imports. |
 | Service | [`mcp-server`](src/mothersauce/mcp.py) | This package's own MCP server: JSON-RPC over stdio with tools, resources and prompts. |
 | The pass | [`testing`](src/mothersauce/data/practice/testing.md) | Fixtures, parametrize, fakes over mocks, doctests and a coverage gate: nothing broken leaves the pass. |
 | The pass | [`bdd`](src/mothersauce/data/practice/bdd.md) | Gherkin features run by pytest-bdd: behaviour written so a person can read it and pytest can run it. |
@@ -129,9 +129,10 @@ pip install https://github.com/jpsanders/mothersauce/releases/download/1.0.0/mot
 On Claude Code before 2.1.275, add the marketplace first, `/plugin marketplace add jpsanders/mothersauce`, then
 `/plugin install mothersauce@mothersauce`.
 
-**Every other harness:** `mothersauce integrate` registers the server and installs the skill in Claude Code, Codex,
-OpenCode, Gemini CLI and Cursor, using each harness's own command line where it has one. `--dry-run` shows what it
-would change. Or add the server to any MCP client by hand, with nothing installed first:
+**Every other harness:** `mothersauce integrate` registers the server in Claude Code, Codex, OpenCode, Gemini CLI and
+Cursor, and installs the skill in the three that read skills folders: Claude Code, Codex and OpenCode. Claude Code and
+Codex are changed through their own command line; other configuration files get a backup first. `--dry-run` shows
+exactly what a real run would do. Or add the server to any MCP client by hand, with nothing installed first:
 
 ```json
 {"mcpServers": {"mothersauce": {"command": "uvx", "args": ["--from", "git+https://github.com/jpsanders/mothersauce", "mothersauce", "mcp"]}}}
@@ -183,7 +184,7 @@ with `make bench`, best of 20 runs each:
 
 CI runs the same benchmark on the built wheel and fails if `mothersauce list` imports a heavy module. The recipes
 measure themselves too: `mothersauce run performance` times its comparisons on your machine, the generators demo
-shows a million integers as an 8.4 MB list against a 216 byte generator, and the `oop` demo shows `__slots__` saving
+shows a million integers taking 40 MB as a list against 216 bytes as a generator, and the `oop` demo shows `__slots__` saving
 about 40% of the memory of 10,000 objects.
 
 ## Mise en place: the workflow
@@ -199,8 +200,9 @@ make init-dev
 make checks      # isort, black, editorconfig, darglint, flake8, mypy strict, bandit, docs, man page, pytest
 ```
 
-`make checks` is the pass: nothing broken leaves it. CI runs it on Linux and macOS, then builds the wheel, installs it
-in a clean environment and uses every command. The `workflow` recipe has the details, releases included.
+`make checks` is the pass: nothing broken leaves it. CI runs the same checks in the same order, the static ones on
+Linux and the tests on Linux and macOS, then installs the built wheel in a clean environment and runs its commands.
+The `workflow` recipe has the details, releases included.
 
 ## Tests
 

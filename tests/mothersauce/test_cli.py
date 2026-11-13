@@ -147,3 +147,15 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     demo()
     out = capsys.readouterr().out
     assert "integrate" in out and "reads: decorators" in out
+
+
+@pytest.mark.parametrize("limit", ["0", "-1", "two"])
+def test_search_limit_must_be_positive(limit: str) -> None:
+    with pytest.raises(SystemExit) as caught:
+        main(["search", "retry", "--limit", limit])
+    assert caught.value.code == 2
+
+
+def test_show_with_a_blank_name_is_a_usage_error(capsys: pytest.CaptureFixture[str]) -> None:
+    code, _, err = run(capsys, "show", "")
+    assert code == 2 and "a recipe id is required" in err

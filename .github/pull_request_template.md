@@ -15,6 +15,6 @@
 - [ ] Updated documentation (if applicable)
 - [ ] All checks and tests passed locally (`make checks`)
 - [ ] All checks and tests passed in CI
-- [ ] PR is up-to-date with the latest version of the base branch
+- [ ] PR is up to date with the base branch
 - [ ] PR has a clean commit history
 - [ ] Examples/additional configuration notes added to PR description (if applicable)

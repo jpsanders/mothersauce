@@ -3,13 +3,15 @@ Logging: structured, contextual, and configured in one place.
 
 Libraries log; applications decide where the log goes. A module asks for ``logging.getLogger(__name__)`` and never
 calls ``basicConfig``, which belongs to the program's entry point, once. Pass values as arguments,
-``logger.info("loaded %d rows", n)``, not as an f-string: the formatting is skipped when the level is off, and log
-tools can group every "loaded %d rows" event together.
+``logger.info("loaded %d rows", n)``, instead of building the message yourself: the formatting is then skipped when
+the level is off, and log tools can group every "loaded %d rows" event together.
 
 For machines, write JSON lines: one object per event with stable keys, so a search can filter on ``run_id`` instead
 of parsing prose. Context such as the run id lives in a ``ContextVar`` and a ``Filter`` stamps it on every record,
-including records from code that has never heard of it; a ``ContextVar`` stays correct across threads and asyncio
-tasks. ``extra=`` adds fields to a single event, and a second filter keeps secrets out of the log altogether.
+including records from code that has never heard of it. Each asyncio task sees its own value; a new thread starts
+with an empty context, so submit work to a pool with ``contextvars.copy_context().run`` when its logs need the run id.
+``extra=`` adds fields to a single event. A second filter masks the usual shapes of a secret in the message, in the
+extra fields and in the traceback; no filter catches every secret, so never log one on purpose.
 """
 
 import io
@@ -48,22 +50,46 @@ class ContextFilter(logging.Filter):
         return True
 
 
-class RedactSecrets(logging.Filter):
-    """Mask values that look like secrets, such as ``password=hunter2``, before any handler writes them."""
+_SECRET = r"password|passwd|pwd|secret|token|api[_ -]?key|credential"  # nosec B105  # names to look for, no secret
 
-    PATTERN = re.compile(r"(?i)\b(password|passwd|secret|token|api[_ ]?key)(\s*[=:]\s*)(\S+)")
+
+class RedactSecrets(logging.Filter):
+    """
+    Mask secrets before any handler writes them: ``db_password=x``, ``"token": "x"``, ``API_KEY: x`` and the like.
+
+    A key counts as secret when it contains a secret word anywhere, quoted or not; its value is masked up to the next
+    space, quote or separator. ``extra=`` fields with such names are masked whole.
+    """
+
+    PATTERN = re.compile(r"""(?i)(["']?)([\w.-]*(?:""" + _SECRET + r""")[\w.-]*)\1(\s*[=:]\s*)(["']?)[^\s"',;}]+""")
+    SECRET_KEY = re.compile(_SECRET, re.I)
+
+    @classmethod
+    def scrub(cls, text: str) -> str:
+        """
+        Mask every secret value in a text.
+
+        >>> RedactSecrets.scrub('db_password=hunter2 {"token": "abc"}')
+        'db_password=*** {"token": "***"}'
+
+        :param text: Any text, such as a message or a traceback
+        :returns: The text with secret values replaced by ``***``
+        """
+        return cls.PATTERN.sub(r"\1\2\1\3\4***", text)
 
     def filter(self, record: logging.LogRecord) -> bool:
         """
-        Redact the message in place.
+        Redact the message and any secret ``extra=`` field in place.
 
         :param record: The record
-        :returns: Always True: the record is kept, minus the secret
+        :returns: Always True: the record is kept, minus the secrets
         """
         message = record.getMessage()
-        redacted = self.PATTERN.sub(r"\1\2***", message)
+        redacted = self.scrub(message)
         if redacted != message:
             record.msg, record.args = redacted, None
+        for name in [n for n in vars(record) if n not in _STANDARD and self.SECRET_KEY.search(n)]:
+            setattr(record, name, "***")
         return True
 
 
@@ -87,7 +113,7 @@ class JsonFormatter(logging.Formatter):
         }
         event.update({k: v for k, v in vars(record).items() if k not in _STANDARD})
         if record.exc_info:
-            event["exc"] = self.formatException(record.exc_info)
+            event["exc"] = RedactSecrets.scrub(self.formatException(record.exc_info))
         return json.dumps(event, default=str)
 
 

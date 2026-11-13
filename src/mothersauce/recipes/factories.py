@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from importlib.metadata import entry_points
 from pathlib import Path
 from typing import ClassVar, Self
-from urllib.parse import parse_qsl, urlsplit
+from urllib.parse import parse_qsl, unquote, urlsplit
 
 from mothersauce.recipes.abstractions import CsvTicketSource, JsonLinesTicketSource, Row, TicketSource
 
@@ -141,8 +141,18 @@ class MarkdownExporter(Exporter, fmt="md"):
             return ""
         keys = list(rows[0])
         lines = ["| " + " | ".join(keys) + " |", "|" + " --- |" * len(keys)]
-        lines += ["| " + " | ".join(row[k] for k in keys) + " |" for row in rows]
+        lines += ["| " + " | ".join(_cell(row[k]) for k in keys) + " |" for row in rows]
         return "\n".join(lines) + "\n"
+
+
+def _cell(text: str) -> str:
+    """
+    Escape a value for a Markdown table cell: a pipe would start a new column and a newline would end the row.
+
+    :param text: The value
+    :returns: The escaped value
+    """
+    return text.replace("|", "\\|").replace("\n", " ")
 
 
 type Transform = Callable[[Row], Row]
@@ -235,7 +245,7 @@ class SourceSpec:
         parts = urlsplit(url)
         if not parts.scheme or not parts.path:
             raise ValueError(f"expected scheme:///path, got {url!r}")
-        return cls(parts.scheme.lower(), Path(parts.path), frozendict(parse_qsl(parts.query)))
+        return cls(parts.scheme.lower(), Path(unquote(parts.path)), frozendict(parse_qsl(parts.query)))
 
     @classmethod
     def from_mapping(cls, data: Mapping[str, str]) -> Self:

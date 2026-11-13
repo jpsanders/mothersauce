@@ -125,16 +125,16 @@ exclude = '''
 exclude_dirs = ["tests"]
 
 [tool.pydocstyle]
-### Ignoring explanation
-# D1 - Missing docstrings (enforced elsewhere)
-# D202 - No blank lines after function docstring
-# D203 - 1 blank line required before class docstring
-# D205 - 1 blank line required between summary line and description
-# D212 - Multi-line docstring summary should start at the first line
-# D406 - Section name should end with newline
-# D407 - Missing dashed underline after section
-# D411 - Missing blank line before section
-# D413 - Missing blank line after last section
+### Why each code is ignored
+# D1: missing docstrings (enforced elsewhere)
+# D202: no blank lines after a function docstring
+# D203: one blank line required before a class docstring
+# D205: one blank line required between the summary line and the description
+# D212: a multiline docstring summary should start at the first line
+# D406: a section name should end with a newline
+# D407: missing underline after a section
+# D411: missing blank line before a section
+# D413: missing blank line after the last section
 ignore = """
 D1,
 D202,D203,D205,D212,

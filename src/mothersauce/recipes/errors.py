@@ -36,7 +36,11 @@ __all__ = [
 
 
 class KitchenError(Exception):
-    """The base of everything this package raises: ``except KitchenError`` catches all of it, and nothing else."""
+    """
+    The base of every single error this package raises: ``except KitchenError`` catches each of them.
+
+    A batch reports its failures together in an ``ExceptionGroup``; handle those with ``except* KitchenError``.
+    """
 
 
 class ConfigError(KitchenError):
@@ -114,6 +118,8 @@ def to_int_or_none(text: object) -> int | None:
     :param text: Anything
     :returns: The integer, or None
     """
+    if isinstance(text, bool) or (isinstance(text, float) and not text.is_integer()):
+        return None  # int() would turn True into 1 and quietly cut 7.9 to 7
     try:
         number: int = int(text)  # type: ignore[call-overload]  # any object may arrive here; int() decides
     except ValueError, TypeError:
@@ -140,6 +146,8 @@ def parse_order(line: int, row: Mapping[str, str]) -> Order:
         price = Decimal(row.get("price", ""))
     except InvalidOperation as error:
         raise RecordError(line, "price", f"not a number: {row.get('price')!r}") from error
+    if not price.is_finite() or price < 0:
+        raise RecordError(line, "price", f"must be a finite amount of zero or more, got {row.get('price')!r}")
     return Order(dish, quantity, price)
 
 

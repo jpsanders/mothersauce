@@ -43,7 +43,8 @@ def test_bounded_map_never_exceeds_in_flight() -> None:
             running -= 1
         return n
 
-    assert sorted(bounded_map(work, range(50), workers=8, in_flight=3)) == list(range(50))
+    results = [r for _, r in bounded_map(work, range(50), workers=8, in_flight=3) if not isinstance(r, Exception)]
+    assert sorted(results) == list(range(50))
     assert peak <= 3
 
 
@@ -112,3 +113,9 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert "20 suppliers in" in out and "4 failed" in out
     assert "at most 3 at once" in out
+
+
+def test_bounded_map_keeps_every_error_next_to_its_item() -> None:
+    outcomes = dict(bounded_map(lambda n: 10 // (n - 2), range(5), workers=2, in_flight=2))
+    assert set(outcomes) == {0, 1, 2, 3, 4}
+    assert isinstance(outcomes[2], ZeroDivisionError) and outcomes[3] == 10

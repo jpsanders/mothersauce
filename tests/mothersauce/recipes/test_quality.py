@@ -107,3 +107,18 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert "accepted ['L1', 'L2', 'L5'], quarantined ['L3', 'L4', 'L1']" in out
     assert "waived: L5 price_not_zero, by head chef" in out
+
+
+@pytest.mark.usefixtures("restore_rules")
+def test_a_crashing_rule_fails_its_check_without_stopping_the_run() -> None:
+    @rule("divides_by_zero", Severity.ERROR, "a buggy rule")
+    def buggy(record: Mapping[str, str]) -> bool:
+        return 1 / 0 > 0
+
+    report = check_batch([line("L1"), line("L2")], today=TODAY)
+    assert len(report.quarantined) == 2 and report.by_rule() == {"divides_by_zero": 2}
+
+
+def test_by_rule_lists_the_most_frequent_first() -> None:
+    batch = [line("L1", station="bar"), line("L2", quantity="0"), line("L3", quantity="0")]
+    assert list(check_batch(batch, today=TODAY).by_rule()) == ["quantity_positive", "known_station"]

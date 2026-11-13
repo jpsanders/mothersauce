@@ -143,3 +143,10 @@ def test_demo_runs(capsys: pytest.CaptureFixture[str]) -> None:
     out = capsys.readouterr().out
     assert "supplier answered '42 lemons' after 3 calls" in out
     assert "'price': '31.50'" in out
+
+
+def test_first_backoff_is_capped_by_the_base_delay() -> None:
+    waits: list[float] = []
+    flaky = Flaky(1, TimeoutError("slow"))
+    retry(attempts=2, base_delay=0.5, sleep=waits.append, rng=random.Random(3))(flaky)(1)  # nosec B311
+    assert len(waits) == 1 and 0 <= waits[0] <= 0.5
