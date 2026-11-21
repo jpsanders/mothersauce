@@ -8,6 +8,7 @@ Instructions for AI coding agents working in this repository. People will find t
 make init-dev     # install the package and the development tools into the active environment
 make format       # apply black and isort
 make checks       # every check CI runs, in CI's order; run it before you say a change is done
+make ruru         # ruru reviews your branch against main: tamper audit, fail first, mutants (in checks)
 make docs         # rebuild docs/RECIPES.md, the README menu, llms.txt and the skill copy from the catalogue
 make man          # rebuild the man page and the packaged manual after editing docs/MANUAL.md
 make bench        # start up times; fails if `mothersauce list` imports a heavy module
